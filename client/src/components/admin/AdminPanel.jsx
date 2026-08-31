@@ -22,6 +22,7 @@ export default function AdminPanel() {
                 <th>Kalender</th>
                 <th>Aufgaben</th>
                 <th>Kontakte</th>
+                <th>Projekte</th>
                 <th>Rolle</th>
                 <th></th>
               </tr>

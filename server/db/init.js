@@ -7,6 +7,11 @@ function columnExists(table, column) {
   return rows.some((r) => r.name === column);
 }
 
+function tableSql(table) {
+  const row = db.prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?").get(table);
+  return row ? row.sql : '';
+}
+
 function migrate() {
   // One-time cleanup of throwaway test accounts created while verifying the
   // deploy. Targeted by exact email, not a pattern — never touches a real
@@ -31,6 +36,32 @@ function migrate() {
   }
   if (!columnExists('events', 'priority')) {
     db.exec("ALTER TABLE events ADD COLUMN priority TEXT NOT NULL DEFAULT 'medium'");
+  }
+  if (!columnExists('projects', 'description')) {
+    db.exec('ALTER TABLE projects ADD COLUMN description TEXT');
+  }
+  if (!columnExists('projects', 'status')) {
+    db.exec("ALTER TABLE projects ADD COLUMN status TEXT NOT NULL DEFAULT 'active'");
+  }
+  if (!columnExists('tasks', 'assignee_id')) {
+    db.exec('ALTER TABLE tasks ADD COLUMN assignee_id INTEGER REFERENCES users(id) ON DELETE SET NULL');
+  }
+
+  // SQLite can't ALTER a CHECK constraint, so widening the allowed `area`
+  // values (adding 'projects') means recreating the table and copying rows.
+  if (!tableSql('permissions').includes("'projects'")) {
+    db.exec(`
+      CREATE TABLE permissions_new (
+        user_id  INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        area     TEXT NOT NULL CHECK (area IN ('calendar','tasks','contacts','projects')),
+        can_view INTEGER NOT NULL DEFAULT 0,
+        can_edit INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (user_id, area)
+      );
+      INSERT INTO permissions_new SELECT * FROM permissions;
+      DROP TABLE permissions;
+      ALTER TABLE permissions_new RENAME TO permissions;
+    `);
   }
 
   // Bootstrap: if no admin exists yet, promote the earliest-created account.

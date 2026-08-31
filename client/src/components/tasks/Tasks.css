@@ -74,6 +74,28 @@
   color: var(--color-text-muted);
 }
 
+.task-assignee {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+}
+
+.task-assignee-avatar {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: #201a33;
+  font-weight: 700;
+  font-size: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
 .task-status-select {
   margin-top: 0.2rem;
   font-size: 0.72rem;

@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- Admins bypass this table entirely. A user with no row for an area has no access to it.
 CREATE TABLE IF NOT EXISTS permissions (
   user_id  INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  area     TEXT NOT NULL CHECK (area IN ('calendar','tasks','contacts')),
+  area     TEXT NOT NULL CHECK (area IN ('calendar','tasks','contacts','projects')),
   can_view INTEGER NOT NULL DEFAULT 0,
   can_edit INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (user_id, area)
@@ -33,17 +33,35 @@ CREATE INDEX IF NOT EXISTS idx_messages_sender ON messages(sender_id, recipient_
 CREATE INDEX IF NOT EXISTS idx_messages_recipient ON messages(recipient_id, sender_id);
 
 CREATE TABLE IF NOT EXISTS projects (
-  id         INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  name       TEXT NOT NULL,
-  color      TEXT NOT NULL DEFAULT '#c4b5fd',
-  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name        TEXT NOT NULL,
+  description TEXT,
+  status      TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','done','archived')),
+  color       TEXT NOT NULL DEFAULT '#c4b5fd',
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS documents (
+  id                INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id        INTEGER REFERENCES projects(id) ON DELETE SET NULL,
+  user_id           INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title             TEXT NOT NULL,
+  description       TEXT,
+  original_filename TEXT NOT NULL,
+  stored_filename   TEXT NOT NULL UNIQUE,
+  mime_type         TEXT,
+  size_bytes        INTEGER NOT NULL,
+  created_at        TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_documents_project ON documents(project_id);
 
 CREATE TABLE IF NOT EXISTS tasks (
   id           INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   project_id   INTEGER REFERENCES projects(id) ON DELETE SET NULL,
+  assignee_id  INTEGER REFERENCES users(id) ON DELETE SET NULL,
   title        TEXT NOT NULL,
   description  TEXT,
   status       TEXT NOT NULL DEFAULT 'todo' CHECK (status IN ('todo','in_progress','done')),

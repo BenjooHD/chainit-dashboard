@@ -15,6 +15,12 @@ export default function TaskCard({ task, onStatusChange, onEdit, readOnly = fals
         </span>
       )}
       <div className="task-title">{task.title}</div>
+      {task.assigneeUsername && (
+        <div className="task-assignee">
+          <span className="task-assignee-avatar">{task.assigneeUsername[0]?.toUpperCase()}</span>
+          {task.assigneeUsername}
+        </div>
+      )}
       {task.dueDate && <div className="task-due">Fällig: {task.dueDate}</div>}
       {readOnly ? (
         <div className="task-status-readonly">

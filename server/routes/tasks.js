@@ -17,19 +17,24 @@ function serializeTask(row) {
     projectId: row.project_id,
     projectName: row.project_name || null,
     projectColor: row.project_color || null,
+    assigneeId: row.assignee_id,
+    assigneeUsername: row.assignee_username || null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     completedAt: row.completed_at,
   };
 }
 
+const TASK_SELECT = `
+  SELECT t.*, p.name AS project_name, p.color AS project_color, u.username AS assignee_username
+  FROM tasks t
+  LEFT JOIN projects p ON p.id = t.project_id
+  LEFT JOIN users u ON u.id = t.assignee_id
+`;
+
 router.get('/', canView, (req, res) => {
   const { status } = req.query;
-  let sql = `
-    SELECT t.*, p.name AS project_name, p.color AS project_color
-    FROM tasks t
-    LEFT JOIN projects p ON p.id = t.project_id
-  `;
+  let sql = TASK_SELECT;
   const params = [];
   if (status) {
     sql += ' WHERE t.status = ?';
@@ -57,8 +62,13 @@ router.post('/projects', canEdit, (req, res) => {
   res.status(201).json({ id: row.id, name: row.name, color: row.color });
 });
 
+router.get('/assignees', canView, (req, res) => {
+  const rows = db.prepare('SELECT id, username FROM users ORDER BY username COLLATE NOCASE ASC').all();
+  res.json(rows);
+});
+
 router.post('/', canEdit, (req, res) => {
-  const { title, description, projectId, status, dueDate } = req.body || {};
+  const { title, description, projectId, status, dueDate, assigneeId } = req.body || {};
   if (!title) return res.status(400).json({ error: 'title is required' });
 
   const validStatus = ['todo', 'in_progress', 'done'].includes(status) ? status : 'todo';
@@ -66,17 +76,21 @@ router.post('/', canEdit, (req, res) => {
 
   const result = db
     .prepare(
-      `INSERT INTO tasks (user_id, project_id, title, description, status, due_date, completed_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO tasks (user_id, project_id, assignee_id, title, description, status, due_date, completed_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
     )
-    .run(req.session.userId, projectId || null, title, description || null, validStatus, dueDate || null, completedAt);
+    .run(
+      req.session.userId,
+      projectId || null,
+      assigneeId || null,
+      title,
+      description || null,
+      validStatus,
+      dueDate || null,
+      completedAt
+    );
 
-  const row = db
-    .prepare(
-      `SELECT t.*, p.name AS project_name, p.color AS project_color
-       FROM tasks t LEFT JOIN projects p ON p.id = t.project_id WHERE t.id = ?`
-    )
-    .get(result.lastInsertRowid);
+  const row = db.prepare(`${TASK_SELECT} WHERE t.id = ?`).get(result.lastInsertRowid);
   res.status(201).json(serializeTask(row));
 });
 
@@ -84,12 +98,13 @@ router.patch('/:id', canEdit, (req, res) => {
   const existing = db.prepare('SELECT * FROM tasks WHERE id = ?').get(req.params.id);
   if (!existing) return res.status(404).json({ error: 'Task not found' });
 
-  const { title, description, projectId, status, dueDate } = req.body || {};
+  const { title, description, projectId, status, dueDate, assigneeId } = req.body || {};
 
   const nextTitle = title !== undefined ? title : existing.title;
   const nextDescription = description !== undefined ? description : existing.description;
   const nextProjectId = projectId !== undefined ? projectId : existing.project_id;
   const nextDueDate = dueDate !== undefined ? dueDate : existing.due_date;
+  const nextAssigneeId = assigneeId !== undefined ? assigneeId : existing.assignee_id;
   let nextStatus = existing.status;
   let nextCompletedAt = existing.completed_at;
 
@@ -103,16 +118,20 @@ router.patch('/:id', canEdit, (req, res) => {
   }
 
   db.prepare(
-    `UPDATE tasks SET title = ?, description = ?, project_id = ?, status = ?, due_date = ?,
+    `UPDATE tasks SET title = ?, description = ?, project_id = ?, assignee_id = ?, status = ?, due_date = ?,
      completed_at = ?, updated_at = datetime('now') WHERE id = ?`
-  ).run(nextTitle, nextDescription, nextProjectId, nextStatus, nextDueDate, nextCompletedAt, req.params.id);
+  ).run(
+    nextTitle,
+    nextDescription,
+    nextProjectId,
+    nextAssigneeId || null,
+    nextStatus,
+    nextDueDate,
+    nextCompletedAt,
+    req.params.id
+  );
 
-  const row = db
-    .prepare(
-      `SELECT t.*, p.name AS project_name, p.color AS project_color
-       FROM tasks t LEFT JOIN projects p ON p.id = t.project_id WHERE t.id = ?`
-    )
-    .get(req.params.id);
+  const row = db.prepare(`${TASK_SELECT} WHERE t.id = ?`).get(req.params.id);
   res.json(serializeTask(row));
 });
 

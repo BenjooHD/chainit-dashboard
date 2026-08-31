@@ -15,6 +15,8 @@ const contactsRouter = require('./routes/contacts');
 const statsRouter = require('./routes/stats');
 const adminRouter = require('./routes/admin');
 const messagesRouter = require('./routes/messages');
+const projectsRouter = require('./routes/projects');
+const documentsRouter = require('./routes/documents');
 
 initDb();
 
@@ -54,6 +56,8 @@ app.use('/api/contacts', requireAuth, contactsRouter);
 app.use('/api/stats', requireAuth, statsRouter);
 app.use('/api/admin', requireAuth, requireAdmin, adminRouter);
 app.use('/api/messages', requireAuth, messagesRouter);
+app.use('/api/projects', requireAuth, projectsRouter);
+app.use('/api/documents', requireAuth, documentsRouter);
 
 if (IS_PRODUCTION) {
   const clientDist = path.join(__dirname, '..', 'client', 'dist');

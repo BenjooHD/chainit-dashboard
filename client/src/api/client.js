@@ -25,3 +25,23 @@ export const apiPost = (path, body) => request('POST', path, body ?? {});
 export const apiPatch = (path, body) => request('PATCH', path, body ?? {});
 export const apiPut = (path, body) => request('PUT', path, body ?? {});
 export const apiDelete = (path) => request('DELETE', path);
+
+export async function apiUpload(path, formData) {
+  const res = await fetch(`/api${path}`, {
+    method: 'POST',
+    credentials: 'include',
+    body: formData,
+  });
+
+  const isJson = res.headers.get('content-type')?.includes('application/json');
+  const data = isJson ? await res.json() : null;
+
+  if (!res.ok) {
+    const message = (data && data.error) || `Request failed (${res.status})`;
+    const error = new Error(message);
+    error.status = res.status;
+    throw error;
+  }
+
+  return data;
+}

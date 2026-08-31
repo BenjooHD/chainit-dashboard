@@ -2,11 +2,12 @@ import { useState } from 'react';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
 
-export default function TaskFormModal({ task, projects, onClose, onSave, onDelete, onCreateProject }) {
+export default function TaskFormModal({ task, projects, assignees, onClose, onSave, onDelete, onCreateProject }) {
   const [title, setTitle] = useState(task?.title || '');
   const [description, setDescription] = useState(task?.description || '');
   const [status, setStatus] = useState(task?.status || 'todo');
   const [projectId, setProjectId] = useState(task?.projectId || '');
+  const [assigneeId, setAssigneeId] = useState(task?.assigneeId || '');
   const [dueDate, setDueDate] = useState(task?.dueDate || '');
   const [newProjectName, setNewProjectName] = useState('');
   const [saving, setSaving] = useState(false);
@@ -31,6 +32,7 @@ export default function TaskFormModal({ task, projects, onClose, onSave, onDelet
         description: description.trim() || null,
         status,
         projectId: finalProjectId,
+        assigneeId: assigneeId || null,
         dueDate: dueDate || null,
       });
       onClose();
@@ -76,6 +78,17 @@ export default function TaskFormModal({ task, projects, onClose, onSave, onDelet
             <option value="todo">To Do</option>
             <option value="in_progress">In Arbeit</option>
             <option value="done">Erledigt</option>
+          </select>
+        </label>
+        <label>
+          Zugewiesen an
+          <select value={assigneeId || ''} onChange={(e) => setAssigneeId(e.target.value)}>
+            <option value="">Niemand</option>
+            {assignees.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.username}
+              </option>
+            ))}
           </select>
         </label>
         <label>

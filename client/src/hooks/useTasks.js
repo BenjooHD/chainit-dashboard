@@ -4,15 +4,21 @@ import { apiDelete, apiGet, apiPatch, apiPost } from '../api/client';
 export function useTasks(onChange) {
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [assignees, setAssignees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const [t, p] = await Promise.all([apiGet('/tasks'), apiGet('/tasks/projects')]);
+      const [t, p, a] = await Promise.all([
+        apiGet('/tasks'),
+        apiGet('/tasks/projects'),
+        apiGet('/tasks/assignees'),
+      ]);
       setTasks(t);
       setProjects(p);
+      setAssignees(a);
       setError(null);
     } catch (e) {
       setError(e.message);
@@ -63,5 +69,5 @@ export function useTasks(onChange) {
     [refresh]
   );
 
-  return { tasks, projects, loading, error, refresh, create, update, remove, createProject };
+  return { tasks, projects, assignees, loading, error, refresh, create, update, remove, createProject };
 }

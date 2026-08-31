@@ -12,7 +12,7 @@ const COLUMNS = [
 ];
 
 export default function TaskBoard({ tasksHook, readOnly = false }) {
-  const { tasks, projects, create, update, remove, createProject } = tasksHook;
+  const { tasks, projects, assignees, create, update, remove, createProject } = tasksHook;
   const [editingTask, setEditingTask] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
@@ -72,6 +72,7 @@ export default function TaskBoard({ tasksHook, readOnly = false }) {
         <TaskFormModal
           task={editingTask}
           projects={projects}
+          assignees={assignees}
           onClose={() => {
             setShowCreate(false);
             setEditingTask(null);
