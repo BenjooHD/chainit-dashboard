@@ -52,7 +52,9 @@ export default function DashboardPage() {
   const todayStr = dateKey(new Date());
   const in5DaysStr = dateKey(new Date(Date.now() + UPCOMING_DAYS * 24 * 60 * 60 * 1000));
   const overdueTasks = canTasks
-    ? tasksHook.tasks.filter((t) => t.status !== 'done' && t.dueDate && t.dueDate < todayStr)
+    ? tasksHook.tasks
+        .filter((t) => t.status !== 'done' && t.dueDate && t.dueDate < todayStr)
+        .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
     : [];
   const upcomingTasks = canTasks
     ? tasksHook.tasks
@@ -69,9 +71,9 @@ export default function DashboardPage() {
   return (
     <div>
       <Header
-        overdueCount={overdueTasks.length}
-        importantEventCount={importantEvents.length}
-        upcomingTaskCount={upcomingTasks.length}
+        overdueTasks={overdueTasks}
+        importantEvents={importantEvents}
+        upcomingTasks={upcomingTasks}
         onJumpToUrgent={scrollToUrgent}
       />
       {hasAnyAccess && (

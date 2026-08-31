@@ -7,12 +7,21 @@ function ChainItLogo() {
   return <img src="/logo-mark.png" alt="ChainIt" className="header-logo-mark" />;
 }
 
-export default function Header({ overdueCount = 0, importantEventCount = 0, upcomingTaskCount = 0, onJumpToUrgent }) {
+function truncate(text, max = 20) {
+  if (!text) return text;
+  return text.length > max ? `${text.slice(0, max - 1)}…` : text;
+}
+
+export default function Header({ overdueTasks = [], importantEvents = [], upcomingTasks = [], onJumpToUrgent }) {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
-  const hasUrgent = overdueCount > 0 || importantEventCount > 0 || upcomingTaskCount > 0;
+  const hasUrgent = overdueTasks.length > 0 || importantEvents.length > 0 || upcomingTasks.length > 0;
+
+  const topOverdue = overdueTasks[0];
+  const topEvent = importantEvents[0];
+  const topTask = upcomingTasks[0];
 
   return (
     <header className="header">
@@ -26,18 +35,23 @@ export default function Header({ overdueCount = 0, importantEventCount = 0, upco
 
       {hasUrgent && (
         <button className="header-urgent" onClick={onJumpToUrgent}>
-          {overdueCount > 0 && (
+          {topOverdue && (
             <span className="header-urgent-badge header-urgent-badge-danger">
-              {overdueCount} überfällig
+              ⚠ {truncate(topOverdue.title)}
+              {overdueTasks.length > 1 && ` +${overdueTasks.length - 1}`}
             </span>
           )}
-          {importantEventCount > 0 && (
+          {topEvent && (
             <span className="header-urgent-badge header-urgent-badge-danger">
-              {importantEventCount} wichtig · 5 Tage
+              📅 {truncate(topEvent.title)}
+              {importantEvents.length > 1 && ` +${importantEvents.length - 1}`}
             </span>
           )}
-          {upcomingTaskCount > 0 && (
-            <span className="header-urgent-badge">{upcomingTaskCount} fällig · 5 Tage</span>
+          {topTask && (
+            <span className="header-urgent-badge">
+              ✓ {truncate(topTask.title)}
+              {upcomingTasks.length > 1 && ` +${upcomingTasks.length - 1}`}
+            </span>
           )}
         </button>
       )}
