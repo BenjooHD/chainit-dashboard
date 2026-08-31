@@ -9,12 +9,28 @@ const router = express.Router();
 const TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24h
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const AREAS = ['calendar', 'tasks', 'contacts'];
+
+function getPermissions(userId) {
+  const rows = db.prepare('SELECT area, can_view, can_edit FROM permissions WHERE user_id = ?').all(userId);
+  const byArea = Object.fromEntries(AREAS.map((a) => [a, { view: false, edit: false }]));
+  for (const row of rows) {
+    byArea[row.area] = { view: !!row.can_view, edit: !!row.can_edit };
+  }
+  return byArea;
+}
+
 function publicUser(row) {
   return {
     id: row.id,
     username: row.username,
     email: row.email,
     emailVerified: !!row.email_verified,
+    isAdmin: !!row.is_admin,
+    title: row.title || null,
+    permissions: row.is_admin
+      ? Object.fromEntries(AREAS.map((a) => [a, { view: true, edit: true }]))
+      : getPermissions(row.id),
     createdAt: row.created_at,
   };
 }
@@ -69,6 +85,14 @@ router.post('/register', async (req, res) => {
     'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)'
   );
   const result = insert.run(trimmedUsername, trimmedEmail, passwordHash);
+
+  // Bootstrap: the very first account on a fresh install has no one to grant
+  // it access, so it becomes admin automatically.
+  const anyAdmin = db.prepare('SELECT id FROM users WHERE is_admin = 1').get();
+  if (!anyAdmin) {
+    db.prepare('UPDATE users SET is_admin = 1 WHERE id = ?').run(result.lastInsertRowid);
+  }
+
   const user = db.prepare('SELECT * FROM users WHERE id = ?').get(result.lastInsertRowid);
 
   try {

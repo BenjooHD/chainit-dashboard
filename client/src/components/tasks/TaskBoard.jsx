@@ -11,13 +11,16 @@ const COLUMNS = [
   { status: 'done', title: 'Erledigt' },
 ];
 
-export default function TaskBoard({ tasksHook }) {
+export default function TaskBoard({ tasksHook, readOnly = false }) {
   const { tasks, projects, create, update, remove, createProject } = tasksHook;
   const [editingTask, setEditingTask] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
 
   const handleStatusChange = (id, status) => update(id, { status });
+  const handleEdit = (task) => {
+    if (!readOnly) setEditingTask(task);
+  };
 
   const handleSave = async (payload) => {
     if (editingTask) {
@@ -36,7 +39,7 @@ export default function TaskBoard({ tasksHook }) {
     <section className="panel">
       <div className="panel-header">
         <h2>Aufgaben</h2>
-        <Button onClick={() => setShowCreate(true)}>+ Aufgabe</Button>
+        {!readOnly && <Button onClick={() => setShowCreate(true)}>+ Aufgabe</Button>}
       </div>
 
       <div className="task-board">
@@ -54,8 +57,9 @@ export default function TaskBoard({ tasksHook }) {
                   <TaskCard
                     key={task.id}
                     task={task}
-                    onStatusChange={handleStatusChange}
-                    onEdit={setEditingTask}
+                    onStatusChange={readOnly ? undefined : handleStatusChange}
+                    onEdit={handleEdit}
+                    readOnly={readOnly}
                   />
                 ))}
               </div>

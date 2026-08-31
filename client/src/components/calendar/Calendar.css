@@ -100,6 +100,13 @@
   border-color: var(--color-accent);
 }
 
+.cal-event-pill-readonly {
+  cursor: default;
+}
+.cal-event-pill-readonly:hover {
+  border-color: var(--color-border);
+}
+
 .cal-event-more {
   font-size: 0.65rem;
   color: var(--color-text-muted);

@@ -6,12 +6,15 @@ const cors = require('cors');
 
 const initDb = require('./db/init');
 const requireAuth = require('./middleware/requireAuth');
+const requireAdmin = require('./middleware/requireAdmin');
 
 const authRouter = require('./routes/auth');
 const tasksRouter = require('./routes/tasks');
 const eventsRouter = require('./routes/events');
 const contactsRouter = require('./routes/contacts');
 const statsRouter = require('./routes/stats');
+const adminRouter = require('./routes/admin');
+const messagesRouter = require('./routes/messages');
 
 initDb();
 
@@ -49,6 +52,8 @@ app.use('/api/tasks', requireAuth, tasksRouter);
 app.use('/api/events', requireAuth, eventsRouter);
 app.use('/api/contacts', requireAuth, contactsRouter);
 app.use('/api/stats', requireAuth, statsRouter);
+app.use('/api/admin', requireAuth, requireAdmin, adminRouter);
+app.use('/api/messages', requireAuth, messagesRouter);
 
 if (IS_PRODUCTION) {
   const clientDist = path.join(__dirname, '..', 'client', 'dist');

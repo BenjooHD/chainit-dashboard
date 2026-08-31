@@ -6,8 +6,31 @@ CREATE TABLE IF NOT EXISTS users (
   email_verified           INTEGER NOT NULL DEFAULT 0,
   verification_token       TEXT,
   verification_expires_at  TEXT,
+  is_admin                 INTEGER NOT NULL DEFAULT 0,
+  title                    TEXT,
   created_at               TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- Per-user, per-area access control for the shared team areas (calendar/tasks/contacts).
+-- Admins bypass this table entirely. A user with no row for an area has no access to it.
+CREATE TABLE IF NOT EXISTS permissions (
+  user_id  INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  area     TEXT NOT NULL CHECK (area IN ('calendar','tasks','contacts')),
+  can_view INTEGER NOT NULL DEFAULT 0,
+  can_edit INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (user_id, area)
+);
+
+CREATE TABLE IF NOT EXISTS messages (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  sender_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  recipient_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  body         TEXT NOT NULL,
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_messages_sender ON messages(sender_id, recipient_id);
+CREATE INDEX IF NOT EXISTS idx_messages_recipient ON messages(recipient_id, sender_id);
 
 CREATE TABLE IF NOT EXISTS projects (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,

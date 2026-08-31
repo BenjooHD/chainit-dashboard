@@ -4,7 +4,7 @@ import Button from '../common/Button';
 import ConfirmDialog from '../common/ConfirmDialog';
 import './Contacts.css';
 
-export default function ContactsTable({ contactsHook }) {
+export default function ContactsTable({ contactsHook, readOnly = false }) {
   const { contacts, create, update, remove } = contactsHook;
   const [editingContact, setEditingContact] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -22,7 +22,7 @@ export default function ContactsTable({ contactsHook }) {
     <section className="panel">
       <div className="panel-header">
         <h2>Kontakte</h2>
-        <Button onClick={() => setShowCreate(true)}>+ Kontakt</Button>
+        {!readOnly && <Button onClick={() => setShowCreate(true)}>+ Kontakt</Button>}
       </div>
 
       {contacts.length === 0 ? (
@@ -40,7 +40,11 @@ export default function ContactsTable({ contactsHook }) {
             </thead>
             <tbody>
               {contacts.map((c) => (
-                <tr key={c.id} onClick={() => setEditingContact(c)}>
+                <tr
+                  key={c.id}
+                  onClick={readOnly ? undefined : () => setEditingContact(c)}
+                  style={readOnly ? { cursor: 'default' } : undefined}
+                >
                   <td>{c.fullName}</td>
                   <td>{c.company || '–'}</td>
                   <td>{c.email || '–'}</td>

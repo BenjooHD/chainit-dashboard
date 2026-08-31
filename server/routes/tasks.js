@@ -1,7 +1,11 @@
 const express = require('express');
 const db = require('../db/connection');
+const requirePermission = require('../middleware/requirePermission');
 
 const router = express.Router();
+
+const canView = requirePermission('tasks', 'view');
+const canEdit = requirePermission('tasks', 'edit');
 
 function serializeTask(row) {
   return {
@@ -19,17 +23,16 @@ function serializeTask(row) {
   };
 }
 
-router.get('/', (req, res) => {
+router.get('/', canView, (req, res) => {
   const { status } = req.query;
   let sql = `
     SELECT t.*, p.name AS project_name, p.color AS project_color
     FROM tasks t
     LEFT JOIN projects p ON p.id = t.project_id
-    WHERE t.user_id = ?
   `;
-  const params = [req.session.userId];
+  const params = [];
   if (status) {
-    sql += ' AND t.status = ?';
+    sql += ' WHERE t.status = ?';
     params.push(status);
   }
   sql += ' ORDER BY t.created_at DESC';
@@ -38,14 +41,12 @@ router.get('/', (req, res) => {
   res.json(rows.map(serializeTask));
 });
 
-router.get('/projects', (req, res) => {
-  const rows = db
-    .prepare('SELECT * FROM projects WHERE user_id = ? ORDER BY name ASC')
-    .all(req.session.userId);
+router.get('/projects', canView, (req, res) => {
+  const rows = db.prepare('SELECT * FROM projects ORDER BY name ASC').all();
   res.json(rows.map((r) => ({ id: r.id, name: r.name, color: r.color })));
 });
 
-router.post('/projects', (req, res) => {
+router.post('/projects', canEdit, (req, res) => {
   const { name, color } = req.body || {};
   if (!name) return res.status(400).json({ error: 'name is required' });
 
@@ -56,7 +57,7 @@ router.post('/projects', (req, res) => {
   res.status(201).json({ id: row.id, name: row.name, color: row.color });
 });
 
-router.post('/', (req, res) => {
+router.post('/', canEdit, (req, res) => {
   const { title, description, projectId, status, dueDate } = req.body || {};
   if (!title) return res.status(400).json({ error: 'title is required' });
 
@@ -79,10 +80,8 @@ router.post('/', (req, res) => {
   res.status(201).json(serializeTask(row));
 });
 
-router.patch('/:id', (req, res) => {
-  const existing = db
-    .prepare('SELECT * FROM tasks WHERE id = ? AND user_id = ?')
-    .get(req.params.id, req.session.userId);
+router.patch('/:id', canEdit, (req, res) => {
+  const existing = db.prepare('SELECT * FROM tasks WHERE id = ?').get(req.params.id);
   if (!existing) return res.status(404).json({ error: 'Task not found' });
 
   const { title, description, projectId, status, dueDate } = req.body || {};
@@ -105,8 +104,8 @@ router.patch('/:id', (req, res) => {
 
   db.prepare(
     `UPDATE tasks SET title = ?, description = ?, project_id = ?, status = ?, due_date = ?,
-     completed_at = ?, updated_at = datetime('now') WHERE id = ? AND user_id = ?`
-  ).run(nextTitle, nextDescription, nextProjectId, nextStatus, nextDueDate, nextCompletedAt, req.params.id, req.session.userId);
+     completed_at = ?, updated_at = datetime('now') WHERE id = ?`
+  ).run(nextTitle, nextDescription, nextProjectId, nextStatus, nextDueDate, nextCompletedAt, req.params.id);
 
   const row = db
     .prepare(
@@ -117,10 +116,8 @@ router.patch('/:id', (req, res) => {
   res.json(serializeTask(row));
 });
 
-router.delete('/:id', (req, res) => {
-  const result = db
-    .prepare('DELETE FROM tasks WHERE id = ? AND user_id = ?')
-    .run(req.params.id, req.session.userId);
+router.delete('/:id', canEdit, (req, res) => {
+  const result = db.prepare('DELETE FROM tasks WHERE id = ?').run(req.params.id);
   if (result.changes === 0) return res.status(404).json({ error: 'Task not found' });
   res.json({ ok: true });
 });

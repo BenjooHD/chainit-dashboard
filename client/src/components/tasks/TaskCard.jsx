@@ -6,9 +6,9 @@ const STATUS_OPTIONS = [
   { value: 'done', label: 'Erledigt' },
 ];
 
-export default function TaskCard({ task, onStatusChange, onEdit }) {
+export default function TaskCard({ task, onStatusChange, onEdit, readOnly = false }) {
   return (
-    <div className="task-card" onClick={() => onEdit(task)}>
+    <div className={`task-card ${readOnly ? 'task-card-readonly' : ''}`} onClick={() => onEdit(task)}>
       {task.projectName && (
         <span className="task-project-tag" style={{ background: task.projectColor || '#c4b5fd' }}>
           {task.projectName}
@@ -16,18 +16,24 @@ export default function TaskCard({ task, onStatusChange, onEdit }) {
       )}
       <div className="task-title">{task.title}</div>
       {task.dueDate && <div className="task-due">Fällig: {task.dueDate}</div>}
-      <select
-        className="task-status-select"
-        value={task.status}
-        onClick={(e) => e.stopPropagation()}
-        onChange={(e) => onStatusChange(task.id, e.target.value)}
-      >
-        {STATUS_OPTIONS.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
+      {readOnly ? (
+        <div className="task-status-readonly">
+          {STATUS_OPTIONS.find((o) => o.value === task.status)?.label}
+        </div>
+      ) : (
+        <select
+          className="task-status-select"
+          value={task.status}
+          onClick={(e) => e.stopPropagation()}
+          onChange={(e) => onStatusChange(task.id, e.target.value)}
+        >
+          {STATUS_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      )}
     </div>
   );
 }

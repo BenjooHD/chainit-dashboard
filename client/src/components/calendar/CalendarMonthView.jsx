@@ -36,7 +36,7 @@ function dateKey(d) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-export default function CalendarMonthView({ onChange }) {
+export default function CalendarMonthView({ onChange, readOnly = false }) {
   const [monthDate, setMonthDate] = useState(() => startOfMonth(new Date()));
   const { events, create, update, remove } = useEvents(monthDate, onChange);
   const [modalDate, setModalDate] = useState(null);
@@ -103,8 +103,9 @@ export default function CalendarMonthView({ onChange }) {
             inMonth={d.getMonth() === monthDate.getMonth()}
             isToday={isSameDay(d, today)}
             events={eventsByDay[dateKey(d)] || []}
-            onAdd={setModalDate}
-            onSelectEvent={setEditingEvent}
+            onAdd={readOnly ? undefined : setModalDate}
+            onSelectEvent={readOnly ? undefined : setEditingEvent}
+            readOnly={readOnly}
           />
         ))}
       </div>

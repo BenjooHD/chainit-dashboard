@@ -80,6 +80,16 @@
   padding: 0.3rem 0.4rem;
 }
 
+.task-card-readonly {
+  cursor: default;
+}
+
+.task-status-readonly {
+  margin-top: 0.2rem;
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+}
+
 .task-empty {
   font-size: 0.78rem;
   color: var(--color-text-muted);

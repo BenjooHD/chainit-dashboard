@@ -81,6 +81,29 @@
 
 .account-panel-name {
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.8rem;
+}
+
+.account-panel-name:has(+ .account-panel-title) {
+  margin-bottom: 0.2rem;
+}
+
+.account-admin-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: var(--color-accent);
+  color: #201a33;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+}
+
+.account-panel-title {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
   margin-bottom: 0.8rem;
 }
 

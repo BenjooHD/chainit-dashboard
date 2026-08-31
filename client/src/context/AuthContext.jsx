@@ -40,9 +40,20 @@ export function AuthProvider({ children }) {
     return u;
   }, []);
 
+  const can = useCallback(
+    (area, level = 'view') => {
+      if (!user) return false;
+      if (user.isAdmin) return true;
+      return !!user.permissions?.[area]?.[level];
+    },
+    [user]
+  );
+
+  const hasAnyAccess = user?.isAdmin || ['calendar', 'tasks', 'contacts'].some((a) => can(a, 'view'));
+
   return (
     <AuthContext.Provider
-      value={{ user, loading, login, register, logout, resendVerification, updateAccount }}
+      value={{ user, loading, login, register, logout, resendVerification, updateAccount, can, hasAnyAccess }}
     >
       {children}
     </AuthContext.Provider>

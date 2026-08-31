@@ -30,7 +30,11 @@ export default function Header() {
 
         {open && (
           <div className="account-panel">
-            <div className="account-panel-name">{user?.username}</div>
+            <div className="account-panel-name">
+              {user?.username}
+              {user?.isAdmin && <span className="account-admin-badge">Admin</span>}
+            </div>
+            {user?.title && <div className="account-panel-title">{user.title}</div>}
             <button
               className="account-edit"
               onClick={() => {
