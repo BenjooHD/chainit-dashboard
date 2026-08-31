@@ -1,0 +1,112 @@
+.cal-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.cal-month-label {
+  margin-left: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  min-width: 140px;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.4rem;
+}
+
+.cal-grid-header {
+  margin-bottom: 0.4rem;
+}
+
+.cal-weekday {
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  padding-bottom: 0.2rem;
+}
+
+.cal-cell {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  min-height: 88px;
+  padding: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.cal-cell-outside {
+  opacity: 0.4;
+}
+
+.cal-cell-today {
+  border-color: var(--color-accent);
+}
+
+.cal-cell-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cal-cell-date {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.cal-cell-add {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+}
+.cal-cell-add:hover {
+  color: var(--color-accent);
+  background: var(--color-bg-card);
+}
+
+.cal-cell-events {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.cal-event-pill {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent);
+  color: var(--color-text);
+  font-size: 0.68rem;
+  text-align: left;
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cal-event-pill:hover {
+  border-color: var(--color-accent);
+}
+
+.cal-event-more {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 900px) {
+  .cal-cell {
+    min-height: 64px;
+  }
+}

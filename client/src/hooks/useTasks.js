@@ -1,0 +1,67 @@
+import { useCallback, useEffect, useState } from 'react';
+import { apiDelete, apiGet, apiPatch, apiPost } from '../api/client';
+
+export function useTasks(onChange) {
+  const [tasks, setTasks] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [t, p] = await Promise.all([apiGet('/tasks'), apiGet('/tasks/projects')]);
+      setTasks(t);
+      setProjects(p);
+      setError(null);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  const create = useCallback(
+    async (payload) => {
+      const created = await apiPost('/tasks', payload);
+      await refresh();
+      onChange?.();
+      return created;
+    },
+    [refresh, onChange]
+  );
+
+  const update = useCallback(
+    async (id, payload) => {
+      const updated = await apiPatch(`/tasks/${id}`, payload);
+      await refresh();
+      onChange?.();
+      return updated;
+    },
+    [refresh, onChange]
+  );
+
+  const remove = useCallback(
+    async (id) => {
+      await apiDelete(`/tasks/${id}`);
+      await refresh();
+      onChange?.();
+    },
+    [refresh, onChange]
+  );
+
+  const createProject = useCallback(
+    async (payload) => {
+      const created = await apiPost('/tasks/projects', payload);
+      await refresh();
+      return created;
+    },
+    [refresh]
+  );
+
+  return { tasks, projects, loading, error, refresh, create, update, remove, createProject };
+}
