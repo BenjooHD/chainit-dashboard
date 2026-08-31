@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { apiGet, apiPost } from '../api/client';
+import { apiGet, apiPatch, apiPost } from '../api/client';
 
 const AuthContext = createContext(null);
 
@@ -34,8 +34,16 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  const updateAccount = useCallback(async ({ currentPassword, newUsername, newPassword }) => {
+    const u = await apiPatch('/auth/me', { currentPassword, newUsername, newPassword });
+    setUser(u);
+    return u;
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, resendVerification }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, register, logout, resendVerification, updateAccount }}
+    >
       {children}
     </AuthContext.Provider>
   );

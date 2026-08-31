@@ -163,4 +163,55 @@ router.get('/me', (req, res) => {
   res.json(publicUser(user));
 });
 
+router.patch('/me', (req, res) => {
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.session.userId);
+  if (!user) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  const { currentPassword, newUsername, newPassword } = req.body || {};
+  if (!currentPassword) {
+    return res.status(400).json({ error: 'currentPassword is required' });
+  }
+  if (!bcrypt.compareSync(currentPassword, user.password_hash)) {
+    return res.status(401).json({ error: 'Current password is incorrect' });
+  }
+  if (!newUsername && !newPassword) {
+    return res.status(400).json({ error: 'Provide a newUsername and/or newPassword' });
+  }
+
+  let nextUsername = user.username;
+  if (newUsername) {
+    const trimmed = String(newUsername).trim();
+    if (trimmed.length < 3) {
+      return res.status(400).json({ error: 'Username must be at least 3 characters' });
+    }
+    const existing = db.prepare('SELECT id FROM users WHERE username = ? AND id != ?').get(trimmed, user.id);
+    if (existing) {
+      return res.status(409).json({ error: 'This username is already taken' });
+    }
+    nextUsername = trimmed;
+  }
+
+  let nextPasswordHash = user.password_hash;
+  if (newPassword) {
+    if (String(newPassword).length < 8) {
+      return res.status(400).json({ error: 'New password must be at least 8 characters' });
+    }
+    nextPasswordHash = bcrypt.hashSync(newPassword, 10);
+  }
+
+  db.prepare('UPDATE users SET username = ?, password_hash = ? WHERE id = ?').run(
+    nextUsername,
+    nextPasswordHash,
+    user.id
+  );
+
+  const updated = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
+  res.json(publicUser(updated));
+});
+
 module.exports = router;

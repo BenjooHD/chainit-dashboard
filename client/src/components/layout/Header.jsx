@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import AccountSettingsModal from './AccountSettingsModal';
 import './Header.css';
 
 function ChainItLogo() {
@@ -9,6 +10,7 @@ function ChainItLogo() {
 export default function Header() {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   return (
     <header className="header">
@@ -29,12 +31,23 @@ export default function Header() {
         {open && (
           <div className="account-panel">
             <div className="account-panel-name">{user?.username}</div>
+            <button
+              className="account-edit"
+              onClick={() => {
+                setShowSettings(true);
+                setOpen(false);
+              }}
+            >
+              Konto bearbeiten
+            </button>
             <button className="account-logout" onClick={logout}>
               Abmelden
             </button>
           </div>
         )}
       </div>
+
+      {showSettings && <AccountSettingsModal onClose={() => setShowSettings(false)} />}
     </header>
   );
 }
