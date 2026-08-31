@@ -13,11 +13,12 @@ import { useAuth } from '../context/AuthContext';
 import { useStats } from '../hooks/useStats';
 import { useTasks } from '../hooks/useTasks';
 import { useContacts } from '../hooks/useContacts';
-import { useTodayEvents } from '../hooks/useTodayEvents';
+import { useUpcomingEvents } from '../hooks/useUpcomingEvents';
 import './Dashboard.css';
 
-function todayKey() {
-  const d = new Date();
+const UPCOMING_DAYS = 5;
+
+function dateKey(d) {
   const pad = (n) => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
@@ -39,22 +40,35 @@ export default function DashboardPage() {
   const canTasks = can('tasks', 'view');
   const canContacts = can('contacts', 'view');
 
-  const { events: todayEvents, loading: eventsLoading, refresh: refreshTodayEvents } = useTodayEvents(canCalendar);
+  const { events: upcomingEvents, loading: eventsLoading, refresh: refreshUpcomingEvents } = useUpcomingEvents(
+    UPCOMING_DAYS,
+    canCalendar
+  );
+  const importantEvents = upcomingEvents.filter((e) => e.priority === 'high');
+
+  const todayStr = dateKey(new Date());
+  const in5DaysStr = dateKey(new Date(Date.now() + UPCOMING_DAYS * 24 * 60 * 60 * 1000));
   const overdueTasks = canTasks
-    ? tasksHook.tasks.filter((t) => t.status !== 'done' && t.dueDate && t.dueDate < todayKey())
+    ? tasksHook.tasks.filter((t) => t.status !== 'done' && t.dueDate && t.dueDate < todayStr)
+    : [];
+  const upcomingTasks = canTasks
+    ? tasksHook.tasks
+        .filter((t) => t.status !== 'done' && t.dueDate && t.dueDate >= todayStr && t.dueDate <= in5DaysStr)
+        .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
     : [];
 
   const scrollToUrgent = () => urgentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   const handleCalendarChange = () => {
     refreshStats();
-    refreshTodayEvents();
+    refreshUpcomingEvents();
   };
 
   return (
     <div>
       <Header
         overdueCount={overdueTasks.length}
-        todayCount={todayEvents.length}
+        importantEventCount={importantEvents.length}
+        upcomingTaskCount={upcomingTasks.length}
         onJumpToUrgent={scrollToUrgent}
       />
       {hasAnyAccess && (
@@ -74,7 +88,8 @@ export default function DashboardPage() {
             <div ref={urgentRef}>
               <UrgentPanel
                 overdueTasks={overdueTasks}
-                todayEvents={todayEvents}
+                upcomingTasks={upcomingTasks}
+                importantEvents={importantEvents}
                 loading={eventsLoading}
                 showTasks={canTasks}
                 showCalendar={canCalendar}

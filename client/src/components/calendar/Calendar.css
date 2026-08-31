@@ -108,6 +108,9 @@
 }
 .cal-event-pill-high {
   border-left-color: var(--color-danger);
+  background: rgba(248, 113, 113, 0.14);
+  color: var(--color-danger);
+  font-weight: 700;
 }
 
 .cal-event-pill-readonly {

@@ -49,9 +49,19 @@ export default function CalendarMonthView({ onChange, readOnly = false }) {
   const eventsByDay = useMemo(() => {
     const map = {};
     for (const ev of events) {
-      const key = dateKey(new Date(ev.startAt));
-      if (!map[key]) map[key] = [];
-      map[key].push(ev);
+      const start = new Date(ev.startAt);
+      const end = new Date(ev.endAt);
+      const cursor = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+      const lastDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+      while (cursor <= lastDay) {
+        const key = dateKey(cursor);
+        if (!map[key]) map[key] = [];
+        map[key].push(ev);
+        cursor.setDate(cursor.getDate() + 1);
+      }
+    }
+    for (const key of Object.keys(map)) {
+      map[key].sort((a, b) => new Date(a.startAt) - new Date(b.startAt));
     }
     return map;
   }, [events]);
