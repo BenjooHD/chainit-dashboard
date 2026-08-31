@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import Header from '../components/layout/Header';
 import QuickNav from '../components/layout/QuickNav';
 import KpiRow from '../components/kpi/KpiRow';
@@ -33,6 +33,7 @@ export default function DashboardPage() {
   const contactsRef = useRef(null);
   const adminRef = useRef(null);
   const urgentRef = useRef(null);
+  const [chatOpen, setChatOpen] = useState(false);
 
   const canCalendar = can('calendar', 'view');
   const canTasks = can('tasks', 'view');
@@ -63,6 +64,7 @@ export default function DashboardPage() {
             { key: 'tasks', label: 'Aufgaben', ref: tasksRef, show: canTasks },
             { key: 'contacts', label: 'Kontakte', ref: contactsRef, show: canContacts },
             { key: 'admin', label: 'Team verwalten', ref: adminRef, show: !!user?.isAdmin },
+            { key: 'chat', label: 'Chat', onClick: () => setChatOpen(true), show: true },
           ]}
         />
       )}
@@ -106,7 +108,7 @@ export default function DashboardPage() {
         )}
       </div>
 
-      <ChatWidget />
+      <ChatWidget open={chatOpen} setOpen={setChatOpen} />
     </div>
   );
 }

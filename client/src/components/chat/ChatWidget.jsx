@@ -53,8 +53,7 @@ function ConversationView({ user }) {
   );
 }
 
-export default function ChatWidget() {
-  const [open, setOpen] = useState(false);
+export default function ChatWidget({ open, setOpen }) {
   const { users, loading } = useChatUsers();
   const [selected, setSelected] = useState(null);
 
