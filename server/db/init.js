@@ -8,10 +8,18 @@ function columnExists(table, column) {
 }
 
 function migrate() {
-  // One-time cleanup of a throwaway test account created while verifying the
-  // deploy (requested to be removed). Targeted by exact email, not a pattern —
-  // never touches a real account. Safe to run every boot: a no-op once gone.
-  db.prepare("DELETE FROM users WHERE email = 'liveuser@example.com'").run();
+  // One-time cleanup of throwaway test accounts created while verifying the
+  // deploy. Targeted by exact email, not a pattern — never touches a real
+  // account. Safe to run every boot: a no-op once they're gone.
+  const testEmails = [
+    'liveuser@example.com',
+    'probe-check@example.com',
+    'probe-check-2@example.com',
+    'probe-check-3@example.com',
+    'probe-check-4@example.com',
+  ];
+  const deleteTestUser = db.prepare('DELETE FROM users WHERE email = ?');
+  for (const email of testEmails) deleteTestUser.run(email);
 
   // Additive migrations for databases created before these columns existed.
   // Never drop/recreate — production already has real accounts in it.
