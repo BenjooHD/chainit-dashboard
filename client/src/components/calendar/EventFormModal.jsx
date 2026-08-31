@@ -9,10 +9,17 @@ function toLocalInput(iso) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+const PRIORITIES = [
+  { value: 'low', label: 'Niedrig' },
+  { value: 'medium', label: 'Mittel' },
+  { value: 'high', label: 'Hoch' },
+];
+
 export default function EventFormModal({ event, defaultDate, onClose, onSave, onDelete }) {
   const [title, setTitle] = useState(event?.title || '');
   const [description, setDescription] = useState(event?.description || '');
   const [location, setLocation] = useState(event?.location || '');
+  const [priority, setPriority] = useState(event?.priority || 'medium');
   const [startAt, setStartAt] = useState(
     event ? toLocalInput(event.startAt) : `${defaultDate}T09:00`
   );
@@ -37,6 +44,7 @@ export default function EventFormModal({ event, defaultDate, onClose, onSave, on
         title: title.trim(),
         description: description.trim() || null,
         location: location.trim() || null,
+        priority,
         startAt,
         endAt,
       });
@@ -80,6 +88,21 @@ export default function EventFormModal({ event, defaultDate, onClose, onSave, on
         <label>
           Ort
           <input value={location} onChange={(e) => setLocation(e.target.value)} />
+        </label>
+        <label>
+          Priorität
+          <div className="priority-btn-group">
+            {PRIORITIES.map((p) => (
+              <button
+                key={p.value}
+                type="button"
+                className={`priority-btn priority-btn-${p.value} ${priority === p.value ? 'priority-btn-active' : ''}`}
+                onClick={() => setPriority(p.value)}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
         </label>
         <label>
           Start

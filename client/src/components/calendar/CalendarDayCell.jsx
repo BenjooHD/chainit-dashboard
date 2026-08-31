@@ -12,11 +12,20 @@ export default function CalendarDayCell({ date, inMonth, isToday, events, onAdd,
       <div className="cal-cell-events">
         {events.slice(0, 3).map((ev) =>
           readOnly ? (
-            <div key={ev.id} className="cal-event-pill cal-event-pill-readonly" title={ev.title}>
+            <div
+              key={ev.id}
+              className={`cal-event-pill cal-event-pill-${ev.priority || 'medium'} cal-event-pill-readonly`}
+              title={ev.title}
+            >
               {ev.title}
             </div>
           ) : (
-            <button key={ev.id} className="cal-event-pill" onClick={() => onSelectEvent(ev)} title={ev.title}>
+            <button
+              key={ev.id}
+              className={`cal-event-pill cal-event-pill-${ev.priority || 'medium'}`}
+              onClick={() => onSelectEvent(ev)}
+              title={ev.title}
+            >
               {ev.title}
             </button>
           )

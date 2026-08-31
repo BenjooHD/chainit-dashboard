@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS events (
   start_at    TEXT NOT NULL,
   end_at      TEXT NOT NULL,
   location    TEXT,
+  priority    TEXT NOT NULL DEFAULT 'medium' CHECK (priority IN ('low','medium','high')),
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

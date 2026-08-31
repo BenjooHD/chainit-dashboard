@@ -100,6 +100,16 @@
   border-color: var(--color-accent);
 }
 
+.cal-event-pill-low {
+  border-left-color: var(--color-text-muted);
+}
+.cal-event-pill-medium {
+  border-left-color: var(--color-accent);
+}
+.cal-event-pill-high {
+  border-left-color: var(--color-danger);
+}
+
 .cal-event-pill-readonly {
   cursor: default;
 }
@@ -110,6 +120,43 @@
 .cal-event-more {
   font-size: 0.65rem;
   color: var(--color-text-muted);
+}
+
+.priority-btn-group {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.priority-btn {
+  flex: 1;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-input);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+.priority-btn:hover {
+  border-color: var(--color-accent);
+}
+
+.priority-btn-active.priority-btn-low {
+  background: rgba(163, 163, 163, 0.15);
+  border-color: var(--color-text-muted);
+  color: var(--color-text);
+}
+.priority-btn-active.priority-btn-medium {
+  background: rgba(196, 181, 253, 0.15);
+  border-color: var(--color-accent);
+  color: var(--color-text);
+}
+.priority-btn-active.priority-btn-high {
+  background: rgba(248, 113, 113, 0.15);
+  border-color: var(--color-danger);
+  color: var(--color-text);
 }
 
 @media (max-width: 900px) {

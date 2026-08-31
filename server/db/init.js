@@ -29,6 +29,9 @@ function migrate() {
   if (!columnExists('users', 'title')) {
     db.exec('ALTER TABLE users ADD COLUMN title TEXT');
   }
+  if (!columnExists('events', 'priority')) {
+    db.exec("ALTER TABLE events ADD COLUMN priority TEXT NOT NULL DEFAULT 'medium'");
+  }
 
   // Bootstrap: if no admin exists yet, promote the earliest-created account.
   // Covers both a fresh install's first registrant and an existing database

@@ -6,6 +6,7 @@ const router = express.Router();
 
 const canView = requirePermission('calendar', 'view');
 const canEdit = requirePermission('calendar', 'edit');
+const VALID_PRIORITIES = ['low', 'medium', 'high'];
 
 function serializeEvent(row) {
   return {
@@ -15,6 +16,7 @@ function serializeEvent(row) {
     startAt: row.start_at,
     endAt: row.end_at,
     location: row.location,
+    priority: row.priority,
     createdAt: row.created_at,
   };
 }
@@ -37,16 +39,17 @@ router.get('/', canView, (req, res) => {
 });
 
 router.post('/', canEdit, (req, res) => {
-  const { title, description, startAt, endAt, location } = req.body || {};
+  const { title, description, startAt, endAt, location, priority } = req.body || {};
   if (!title || !startAt || !endAt) {
     return res.status(400).json({ error: 'title, startAt and endAt are required' });
   }
+  const validPriority = VALID_PRIORITIES.includes(priority) ? priority : 'medium';
 
   const result = db
     .prepare(
-      'INSERT INTO events (user_id, title, description, start_at, end_at, location) VALUES (?, ?, ?, ?, ?, ?)'
+      'INSERT INTO events (user_id, title, description, start_at, end_at, location, priority) VALUES (?, ?, ?, ?, ?, ?, ?)'
     )
-    .run(req.session.userId, title, description || null, startAt, endAt, location || null);
+    .run(req.session.userId, title, description || null, startAt, endAt, location || null, validPriority);
 
   const row = db.prepare('SELECT * FROM events WHERE id = ?').get(result.lastInsertRowid);
   res.status(201).json(serializeEvent(row));
@@ -56,14 +59,15 @@ router.put('/:id', canEdit, (req, res) => {
   const existing = db.prepare('SELECT * FROM events WHERE id = ?').get(req.params.id);
   if (!existing) return res.status(404).json({ error: 'Event not found' });
 
-  const { title, description, startAt, endAt, location } = req.body || {};
+  const { title, description, startAt, endAt, location, priority } = req.body || {};
   if (!title || !startAt || !endAt) {
     return res.status(400).json({ error: 'title, startAt and endAt are required' });
   }
+  const validPriority = VALID_PRIORITIES.includes(priority) ? priority : existing.priority;
 
   db.prepare(
-    'UPDATE events SET title = ?, description = ?, start_at = ?, end_at = ?, location = ? WHERE id = ?'
-  ).run(title, description || null, startAt, endAt, location || null, req.params.id);
+    'UPDATE events SET title = ?, description = ?, start_at = ?, end_at = ?, location = ?, priority = ? WHERE id = ?'
+  ).run(title, description || null, startAt, endAt, location || null, validPriority, req.params.id);
 
   const row = db.prepare('SELECT * FROM events WHERE id = ?').get(req.params.id);
   res.json(serializeEvent(row));

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useChatUsers, useConversation } from '../../hooks/useChat';
 import './Chat.css';
 
-function ConversationView({ user }) {
+function ConversationView({ user, onMessageSent }) {
   const { messages, loading, send } = useConversation(user.id);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
@@ -19,6 +19,7 @@ function ConversationView({ user }) {
     try {
       await send(draft.trim());
       setDraft('');
+      onMessageSent?.();
     } finally {
       setSending(false);
     }
@@ -54,7 +55,7 @@ function ConversationView({ user }) {
 }
 
 export default function ChatWidget({ open, setOpen }) {
-  const { users, loading } = useChatUsers();
+  const { users, loading, refresh: refreshUsers } = useChatUsers();
   const [selected, setSelected] = useState(null);
 
   return (
@@ -90,7 +91,7 @@ export default function ChatWidget({ open, setOpen }) {
               ))}
             </div>
             {selected ? (
-              <ConversationView user={selected} />
+              <ConversationView user={selected} onMessageSent={refreshUsers} />
             ) : (
               <div className="chat-conversation chat-conversation-empty">
                 Wähle links einen Nutzer aus.

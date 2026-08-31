@@ -5,9 +5,19 @@ const router = express.Router();
 
 router.get('/users', (req, res) => {
   const rows = db
-    .prepare('SELECT id, username, title FROM users WHERE id != ? ORDER BY username COLLATE NOCASE ASC')
-    .all(req.session.userId);
-  res.json(rows.map((r) => ({ id: r.id, username: r.username, title: r.title || null })));
+    .prepare(
+      `SELECT u.id, u.username, u.title,
+        (SELECT MAX(m.created_at) FROM messages m
+         WHERE (m.sender_id = ? AND m.recipient_id = u.id) OR (m.sender_id = u.id AND m.recipient_id = ?)
+        ) AS last_message_at
+       FROM users u
+       WHERE u.id != ?
+       ORDER BY last_message_at IS NULL ASC, last_message_at DESC, u.username COLLATE NOCASE ASC`
+    )
+    .all(req.session.userId, req.session.userId, req.session.userId);
+  res.json(
+    rows.map((r) => ({ id: r.id, username: r.username, title: r.title || null, lastMessageAt: r.last_message_at }))
+  );
 });
 
 router.get('/:userId', (req, res) => {

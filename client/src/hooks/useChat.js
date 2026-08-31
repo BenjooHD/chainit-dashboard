@@ -6,14 +6,24 @@ const POLL_MS = 4000;
 export function useChatUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const intervalRef = useRef(null);
 
-  useEffect(() => {
-    apiGet('/messages/users')
-      .then(setUsers)
-      .finally(() => setLoading(false));
+  const refresh = useCallback(async () => {
+    try {
+      const data = await apiGet('/messages/users');
+      setUsers(data);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  return { users, loading };
+  useEffect(() => {
+    refresh();
+    intervalRef.current = setInterval(refresh, POLL_MS);
+    return () => clearInterval(intervalRef.current);
+  }, [refresh]);
+
+  return { users, loading, refresh };
 }
 
 export function useConversation(otherUserId) {
