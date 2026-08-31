@@ -53,41 +53,53 @@ function ConversationView({ user }) {
   );
 }
 
-export default function ChatPanel() {
+export default function ChatWidget() {
+  const [open, setOpen] = useState(false);
   const { users, loading } = useChatUsers();
   const [selected, setSelected] = useState(null);
 
   return (
-    <section className="panel">
-      <div className="panel-header">
-        <h2>Chat</h2>
-      </div>
-      <div className="chat-layout">
-        <div className="chat-user-list">
-          {loading && <div className="task-empty">Lädt…</div>}
-          {!loading && users.length === 0 && <div className="task-empty">Keine anderen Nutzer</div>}
-          {users.map((u) => (
-            <button
-              key={u.id}
-              className={`chat-user-item ${selected?.id === u.id ? 'chat-user-item-active' : ''}`}
-              onClick={() => setSelected(u)}
-            >
-              <span className="chat-user-avatar">{u.username[0]?.toUpperCase()}</span>
-              <span>
-                <div>{u.username}</div>
-                {u.title && <div className="chat-user-title">{u.title}</div>}
-              </span>
+    <>
+      <button className="chat-fab" onClick={() => setOpen((o) => !o)}>
+        {open ? '✕' : '💬'}
+      </button>
+
+      {open && (
+        <div className="chat-drawer">
+          <div className="chat-drawer-header">
+            <span>Chat</span>
+            <button className="chat-drawer-close" onClick={() => setOpen(false)}>
+              ✕
             </button>
-          ))}
-        </div>
-        {selected ? (
-          <ConversationView user={selected} />
-        ) : (
-          <div className="chat-conversation chat-conversation-empty">
-            Wähle links einen Nutzer aus, um zu chatten.
           </div>
-        )}
-      </div>
-    </section>
+          <div className="chat-layout chat-layout-drawer">
+            <div className="chat-user-list">
+              {loading && <div className="task-empty">Lädt…</div>}
+              {!loading && users.length === 0 && <div className="task-empty">Keine anderen Nutzer</div>}
+              {users.map((u) => (
+                <button
+                  key={u.id}
+                  className={`chat-user-item ${selected?.id === u.id ? 'chat-user-item-active' : ''}`}
+                  onClick={() => setSelected(u)}
+                >
+                  <span className="chat-user-avatar">{u.username[0]?.toUpperCase()}</span>
+                  <span>
+                    <div>{u.username}</div>
+                    {u.title && <div className="chat-user-title">{u.title}</div>}
+                  </span>
+                </button>
+              ))}
+            </div>
+            {selected ? (
+              <ConversationView user={selected} />
+            ) : (
+              <div className="chat-conversation chat-conversation-empty">
+                Wähle links einen Nutzer aus.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
