@@ -7,10 +7,12 @@ function ChainItLogo() {
   return <img src="/logo-mark.png" alt="ChainIt" className="header-logo-mark" />;
 }
 
-export default function Header() {
+export default function Header({ overdueCount = 0, todayCount = 0, onJumpToUrgent }) {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+
+  const hasUrgent = overdueCount > 0 || todayCount > 0;
 
   return (
     <header className="header">
@@ -21,6 +23,19 @@ export default function Header() {
           <div className="header-subtitle">Dashboard</div>
         </div>
       </div>
+
+      {hasUrgent && (
+        <button className="header-urgent" onClick={onJumpToUrgent}>
+          {overdueCount > 0 && (
+            <span className="header-urgent-badge header-urgent-badge-danger">
+              {overdueCount} überfällig
+            </span>
+          )}
+          {todayCount > 0 && (
+            <span className="header-urgent-badge">{todayCount} heute</span>
+          )}
+        </button>
+      )}
 
       <div className="header-account">
         <button className="account-trigger" onClick={() => setOpen((o) => !o)}>

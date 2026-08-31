@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { apiGet } from '../api/client';
 
 function todayKey() {
@@ -11,20 +11,25 @@ export function useTodayEvents(enabled) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const refresh = useCallback(async () => {
     if (!enabled) {
       setLoading(false);
       return;
     }
     const now = new Date();
     const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    apiGet(`/events?month=${month}`)
-      .then((all) => {
-        const key = todayKey();
-        setEvents(all.filter((e) => e.startAt.slice(0, 10) === key));
-      })
-      .finally(() => setLoading(false));
+    try {
+      const all = await apiGet(`/events?month=${month}`);
+      const key = todayKey();
+      setEvents(all.filter((e) => e.startAt.slice(0, 10) === key));
+    } finally {
+      setLoading(false);
+    }
   }, [enabled]);
 
-  return { events, loading };
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  return { events, loading, refresh };
 }

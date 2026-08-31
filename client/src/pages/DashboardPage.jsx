@@ -13,7 +13,14 @@ import { useAuth } from '../context/AuthContext';
 import { useStats } from '../hooks/useStats';
 import { useTasks } from '../hooks/useTasks';
 import { useContacts } from '../hooks/useContacts';
+import { useTodayEvents } from '../hooks/useTodayEvents';
 import './Dashboard.css';
+
+function todayKey() {
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
 
 export default function DashboardPage() {
   const { user, can, hasAnyAccess } = useAuth();
@@ -25,14 +32,30 @@ export default function DashboardPage() {
   const tasksRef = useRef(null);
   const contactsRef = useRef(null);
   const adminRef = useRef(null);
+  const urgentRef = useRef(null);
 
   const canCalendar = can('calendar', 'view');
   const canTasks = can('tasks', 'view');
   const canContacts = can('contacts', 'view');
 
+  const { events: todayEvents, loading: eventsLoading, refresh: refreshTodayEvents } = useTodayEvents(canCalendar);
+  const overdueTasks = canTasks
+    ? tasksHook.tasks.filter((t) => t.status !== 'done' && t.dueDate && t.dueDate < todayKey())
+    : [];
+
+  const scrollToUrgent = () => urgentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const handleCalendarChange = () => {
+    refreshStats();
+    refreshTodayEvents();
+  };
+
   return (
     <div>
-      <Header />
+      <Header
+        overdueCount={overdueTasks.length}
+        todayCount={todayEvents.length}
+        onJumpToUrgent={scrollToUrgent}
+      />
       {hasAnyAccess && (
         <QuickNav
           sections={[
@@ -46,11 +69,19 @@ export default function DashboardPage() {
       <div className="dashboard-layout">
         {hasAnyAccess ? (
           <>
-            <UrgentPanel tasks={tasksHook.tasks} showTasks={canTasks} showCalendar={canCalendar} />
+            <div ref={urgentRef}>
+              <UrgentPanel
+                overdueTasks={overdueTasks}
+                todayEvents={todayEvents}
+                loading={eventsLoading}
+                showTasks={canTasks}
+                showCalendar={canCalendar}
+              />
+            </div>
             <KpiRow stats={stats} loading={statsLoading} />
             {canCalendar && (
               <div ref={calendarRef}>
-                <CalendarMonthView onChange={refreshStats} readOnly={!can('calendar', 'edit')} />
+                <CalendarMonthView onChange={handleCalendarChange} readOnly={!can('calendar', 'edit')} />
               </div>
             )}
             {canTasks && (
