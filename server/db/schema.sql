@@ -1,8 +1,12 @@
 CREATE TABLE IF NOT EXISTS users (
-  id            INTEGER PRIMARY KEY AUTOINCREMENT,
-  username      TEXT NOT NULL UNIQUE COLLATE NOCASE,
-  password_hash TEXT NOT NULL,
-  created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+  id                       INTEGER PRIMARY KEY AUTOINCREMENT,
+  username                 TEXT NOT NULL UNIQUE COLLATE NOCASE,
+  email                    TEXT NOT NULL UNIQUE COLLATE NOCASE,
+  password_hash            TEXT NOT NULL,
+  email_verified           INTEGER NOT NULL DEFAULT 0,
+  verification_token       TEXT,
+  verification_expires_at  TEXT,
+  created_at               TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS projects (

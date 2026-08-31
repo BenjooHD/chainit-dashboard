@@ -20,10 +20,13 @@ export function AuthProvider({ children }) {
     return u;
   }, []);
 
-  const register = useCallback(async (username, password) => {
-    const u = await apiPost('/auth/register', { username, password });
-    setUser(u);
-    return u;
+  const register = useCallback(async (username, email, password) => {
+    // Does not log the user in — the account is inactive until the email is verified.
+    return apiPost('/auth/register', { username, email, password });
+  }, []);
+
+  const resendVerification = useCallback(async (username, password) => {
+    return apiPost('/auth/resend-verification', { username, password });
   }, []);
 
   const logout = useCallback(async () => {
@@ -32,7 +35,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, resendVerification }}>
       {children}
     </AuthContext.Provider>
   );
