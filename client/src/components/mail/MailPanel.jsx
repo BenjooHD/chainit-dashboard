@@ -7,7 +7,7 @@ function formatDate(iso) {
   return new Date(iso).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 }
 
-export default function MailPanel({ messages, loading, error, notConfigured, refresh, markAllRead }) {
+export default function MailPanel({ messages, loading, error, notConfigured, refresh, markAllRead, toggleFlag }) {
   const [openUid, setOpenUid] = useState(null);
   const [marking, setMarking] = useState(false);
 
@@ -57,6 +57,16 @@ export default function MailPanel({ messages, loading, error, notConfigured, ref
               className={`mail-item ${m.seen ? '' : 'mail-item-unseen'}`}
               onClick={() => setOpenUid(m.uid)}
             >
+              <button
+                className={`mail-item-flag ${m.flagged ? 'mail-item-flag-active' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleFlag(m.uid, !m.flagged);
+                }}
+                title={m.flagged ? 'Als nicht wichtig markieren' : 'Als wichtig markieren'}
+              >
+                {m.flagged ? '★' : '☆'}
+              </button>
               <span className="mail-item-from">{m.from}</span>
               <span className="mail-item-subject">{m.subject}</span>
               <span className="mail-item-date">{formatDate(m.date)}</span>

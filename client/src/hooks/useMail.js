@@ -31,7 +31,21 @@ export function useMailList(enabled = true) {
     setMessages((prev) => prev.map((m) => ({ ...m, seen: true })));
   }, []);
 
-  return { messages, loading, error, notConfigured, refresh, markAllRead };
+  const toggleFlag = useCallback(async (uid, flagged) => {
+    await apiPatch(`/mail/${uid}/flag`, { flagged });
+    setMessages((prev) => {
+      const next = prev.map((m) => (m.uid === uid ? { ...m, flagged } : m));
+      next.sort((a, b) => {
+        const aTop = !a.seen || a.flagged ? 1 : 0;
+        const bTop = !b.seen || b.flagged ? 1 : 0;
+        if (aTop !== bTop) return bTop - aTop;
+        return new Date(b.date) - new Date(a.date);
+      });
+      return next;
+    });
+  }, []);
+
+  return { messages, loading, error, notConfigured, refresh, markAllRead, toggleFlag };
 }
 
 export function useMailMessage(uid) {

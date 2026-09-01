@@ -41,7 +41,10 @@ export default function MailBell({ messages, notConfigured }) {
               }}
               style={{ cursor: 'pointer' }}
             >
-              <div>{truncate(m.subject, 40)}</div>
+              <div>
+                {m.flagged && <span style={{ color: '#facc15' }}>★ </span>}
+                {truncate(m.subject, 40)}
+              </div>
               <div className="header-notif-time">
                 {truncate(m.from, 30)} · {formatDate(m.date)}
               </div>

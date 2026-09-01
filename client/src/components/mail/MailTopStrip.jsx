@@ -29,7 +29,10 @@ export default function MailTopStrip({ messages, loading, notConfigured, error }
           onClick={() => setOpenUid(m.uid)}
         >
           <span className="mail-top-from">{truncate(m.from, 26)}</span>
-          <span className="mail-top-subject">{truncate(m.subject, 46)}</span>
+          <span className="mail-top-subject">
+            {m.flagged && <span className="mail-top-flag">★ </span>}
+            {truncate(m.subject, 46)}
+          </span>
           <span className="mail-top-date">{formatDate(m.date)}</span>
         </button>
       ))}

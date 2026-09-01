@@ -8,7 +8,7 @@
 
 .mail-item {
   display: grid;
-  grid-template-columns: 180px 1fr 100px;
+  grid-template-columns: auto 180px 1fr 100px;
   gap: 0.8rem;
   padding: 0.6rem 0.4rem;
   border-bottom: 1px solid var(--color-border);
@@ -18,6 +18,22 @@
 }
 .mail-item:hover {
   background: var(--color-bg-elevated);
+}
+
+.mail-item-flag {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--color-text-muted);
+  padding: 0.1rem;
+}
+.mail-item-flag:hover {
+  color: var(--color-accent);
+}
+.mail-item-flag-active {
+  color: #facc15;
 }
 
 .mail-item-unseen {

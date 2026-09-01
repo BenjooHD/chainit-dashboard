@@ -34,9 +34,15 @@ router.get('/', canView, async (req, res) => {
           subject: msg.envelope?.subject || '(kein Betreff)',
           date: msg.envelope?.date || null,
           seen: msg.flags?.has('\\Seen') || false,
+          flagged: msg.flags?.has('\\Flagged') || false,
         });
       }
-      out.sort((a, b) => new Date(b.date) - new Date(a.date));
+      out.sort((a, b) => {
+        const aTop = !a.seen || a.flagged ? 1 : 0;
+        const bTop = !b.seen || b.flagged ? 1 : 0;
+        if (aTop !== bTop) return bTop - aTop;
+        return new Date(b.date) - new Date(a.date);
+      });
       return out;
     });
     res.json(messages);
@@ -61,6 +67,27 @@ router.patch('/mark-all-read', canView, async (req, res) => {
   } catch (err) {
     console.error('IMAP mark-all-read failed:', err);
     res.status(502).json({ error: 'Could not reach the mailbox. Please try again shortly.' });
+  }
+});
+
+router.patch('/:uid/flag', canView, async (req, res) => {
+  if (!isConfigured()) {
+    return res.status(503).json({ error: 'Mail is not configured yet', code: 'MAIL_NOT_CONFIGURED' });
+  }
+  const uid = Number(req.params.uid);
+  const flagged = !!(req.body && req.body.flagged);
+  try {
+    await withMailbox(async (client) => {
+      if (flagged) {
+        await client.messageFlagsAdd(String(uid), ['\\Flagged'], { uid: true });
+      } else {
+        await client.messageFlagsRemove(String(uid), ['\\Flagged'], { uid: true });
+      }
+    });
+    res.json({ ok: true, flagged });
+  } catch (err) {
+    console.error('IMAP flag update failed:', err);
+    res.status(502).json({ error: 'Could not update this message.' });
   }
 });
 
