@@ -8,6 +8,7 @@ import CalendarMonthView from '../components/calendar/CalendarMonthView';
 import ContactsTable from '../components/contacts/ContactsTable';
 import ProjectsPanel from '../components/projects/ProjectsPanel';
 import MailPanel from '../components/mail/MailPanel';
+import AgendaPanel from '../components/agenda/AgendaPanel';
 import AdminPanel from '../components/admin/AdminPanel';
 import ChatWidget from '../components/chat/ChatWidget';
 import PendingApproval from '../components/common/PendingApproval';
@@ -36,6 +37,7 @@ export default function DashboardPage() {
   const contactsRef = useRef(null);
   const projectsRef = useRef(null);
   const mailRef = useRef(null);
+  const agendaRef = useRef(null);
   const adminRef = useRef(null);
   const urgentRef = useRef(null);
   const [chatOpen, setChatOpen] = useState(false);
@@ -45,6 +47,7 @@ export default function DashboardPage() {
   const canContacts = can('contacts', 'view');
   const canProjects = can('projects', 'view');
   const canMail = can('mail', 'view');
+  const canAgenda = can('agenda', 'view');
 
   const { events: upcomingEvents, loading: eventsLoading, refresh: refreshUpcomingEvents } = useUpcomingEvents(
     UPCOMING_DAYS,
@@ -87,6 +90,7 @@ export default function DashboardPage() {
             { key: 'contacts', label: 'Kontakte', ref: contactsRef, show: canContacts },
             { key: 'projects', label: 'Projekte', ref: projectsRef, show: canProjects },
             { key: 'mail', label: 'Mail', ref: mailRef, show: canMail },
+            { key: 'agenda', label: 'Besprechung', ref: agendaRef, show: canAgenda },
             { key: 'admin', label: 'Team verwalten', ref: adminRef, show: !!user?.isAdmin },
             { key: 'chat', label: 'Chat', onClick: () => setChatOpen(true), show: true },
           ]}
@@ -129,6 +133,11 @@ export default function DashboardPage() {
             {canMail && (
               <div ref={mailRef}>
                 <MailPanel />
+              </div>
+            )}
+            {canAgenda && (
+              <div ref={agendaRef}>
+                <AgendaPanel readOnly={!can('agenda', 'edit')} />
               </div>
             )}
           </>

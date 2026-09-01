@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { apiGet } from '../../api/client';
 
-const GROUP_LABELS = { tasks: 'Aufgaben', contacts: 'Kontakte', projects: 'Projekte', documents: 'Unterlagen' };
+const GROUP_LABELS = {
+  tasks: 'Aufgaben',
+  contacts: 'Kontakte',
+  projects: 'Projekte',
+  documents: 'Unterlagen',
+  agenda: 'Besprechung',
+};
 
 export default function SearchBar() {
   const [query, setQuery] = useState('');

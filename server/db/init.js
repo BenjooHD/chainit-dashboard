@@ -55,11 +55,11 @@ function migrate() {
 
   // SQLite can't ALTER a CHECK constraint, so widening the allowed `area`
   // values means recreating the table and copying rows.
-  if (!tableSql('permissions').includes("'mail'")) {
+  if (!tableSql('permissions').includes("'agenda'")) {
     db.exec(`
       CREATE TABLE permissions_new (
         user_id  INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        area     TEXT NOT NULL CHECK (area IN ('calendar','tasks','contacts','projects','mail')),
+        area     TEXT NOT NULL CHECK (area IN ('calendar','tasks','contacts','projects','mail','agenda')),
         can_view INTEGER NOT NULL DEFAULT 0,
         can_edit INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY (user_id, area)

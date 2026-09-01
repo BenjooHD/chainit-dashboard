@@ -5,24 +5,24 @@ const router = express.Router();
 
 function getPermissions(userId, isAdmin) {
   if (isAdmin) {
-    return { calendar: true, tasks: true, contacts: true, projects: true, mail: true };
+    return { calendar: true, tasks: true, contacts: true, projects: true, mail: true, agenda: true };
   }
   const rows = db.prepare('SELECT area, can_view FROM permissions WHERE user_id = ?').all(userId);
-  const perms = { calendar: false, tasks: false, contacts: false, projects: false, mail: false };
+  const perms = { calendar: false, tasks: false, contacts: false, projects: false, mail: false, agenda: false };
   for (const row of rows) perms[row.area] = !!row.can_view;
   return perms;
 }
 
 router.get('/', (req, res) => {
   const q = String(req.query.q || '').trim();
-  if (!q) return res.json({ tasks: [], contacts: [], projects: [], documents: [] });
+  if (!q) return res.json({ tasks: [], contacts: [], projects: [], documents: [], agenda: [] });
 
   const user = db.prepare('SELECT is_admin FROM users WHERE id = ?').get(req.session.userId);
   if (!user) return res.status(401).json({ error: 'Not authenticated' });
   const perms = getPermissions(req.session.userId, !!user.is_admin);
 
   const like = `%${q}%`;
-  const result = { tasks: [], contacts: [], projects: [], documents: [] };
+  const result = { tasks: [], contacts: [], projects: [], documents: [], agenda: [] };
 
   if (perms.tasks) {
     result.tasks = db
@@ -45,6 +45,12 @@ router.get('/', (req, res) => {
       .prepare('SELECT id, title, project_id FROM documents WHERE title LIKE ? LIMIT 8')
       .all(like)
       .map((r) => ({ id: r.id, title: r.title, projectId: r.project_id }));
+  }
+  if (perms.agenda) {
+    result.agenda = db
+      .prepare('SELECT id, title FROM agenda_items WHERE title LIKE ? OR notes LIKE ? LIMIT 8')
+      .all(like, like)
+      .map((r) => ({ id: r.id, title: r.title }));
   }
 
   res.json(result);

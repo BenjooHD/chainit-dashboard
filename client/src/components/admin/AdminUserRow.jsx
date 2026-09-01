@@ -7,6 +7,7 @@ const AREAS = [
   { key: 'contacts', label: 'Kontakte' },
   { key: 'projects', label: 'Projekte' },
   { key: 'mail', label: 'Mail' },
+  { key: 'agenda', label: 'Besprechung' },
 ];
 
 export default function AdminUserRow({ user, onSave }) {

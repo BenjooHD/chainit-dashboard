@@ -20,6 +20,7 @@ const documentsRouter = require('./routes/documents');
 const notificationsRouter = require('./routes/notifications');
 const searchRouter = require('./routes/search');
 const mailRouter = require('./routes/mail');
+const agendaRouter = require('./routes/agenda');
 
 initDb();
 
@@ -64,6 +65,7 @@ app.use('/api/documents', requireAuth, documentsRouter);
 app.use('/api/notifications', requireAuth, notificationsRouter);
 app.use('/api/search', requireAuth, searchRouter);
 app.use('/api/mail', requireAuth, mailRouter);
+app.use('/api/agenda', requireAuth, agendaRouter);
 
 if (IS_PRODUCTION) {
   const clientDist = path.join(__dirname, '..', 'client', 'dist');
