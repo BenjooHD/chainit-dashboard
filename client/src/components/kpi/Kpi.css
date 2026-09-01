@@ -9,6 +9,21 @@
   border-radius: var(--radius);
   box-shadow: var(--shadow-glow);
   padding: 1.1rem 1.25rem;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+}
+
+.kpi-tile-clickable {
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.kpi-tile-clickable:hover {
+  box-shadow: 0 0 0 1px var(--color-accent), var(--shadow-glow);
+}
+.kpi-tile-clickable:active {
+  transform: scale(0.98);
 }
 
 .kpi-value {

@@ -150,7 +150,7 @@ export default function DashboardPage() {
                   showCalendar={canCalendar}
                 />
               </div>
-              <KpiRow stats={stats} loading={statsLoading} />
+              <KpiRow stats={stats} loading={statsLoading} onSelectSection={setActiveSection} />
               {canCalendar && <CalendarMonthView onChange={handleCalendarChange} readOnly={!can('calendar', 'edit')} />}
               {canTasks && <TaskBoard tasksHook={tasksHook} readOnly={!can('tasks', 'edit')} />}
               {canContacts && <ContactsTable contactsHook={contactsHook} readOnly={!can('contacts', 'edit')} />}
