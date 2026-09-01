@@ -5,6 +5,7 @@ const session = require('express-session');
 const cors = require('cors');
 
 const initDb = require('./db/init');
+const SqliteSessionStore = require('./sessionStore');
 const requireAuth = require('./middleware/requireAuth');
 const requireAdmin = require('./middleware/requireAdmin');
 
@@ -23,6 +24,7 @@ const mailRouter = require('./routes/mail');
 const agendaRouter = require('./routes/agenda');
 
 initDb();
+SqliteSessionStore.sweepExpired();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -40,6 +42,7 @@ if (IS_PRODUCTION) {
 app.use(express.json());
 app.use(
   session({
+    store: new SqliteSessionStore(),
     name: 'connect.sid',
     secret: process.env.SESSION_SECRET || 'chainit-dev-secret',
     resave: false,

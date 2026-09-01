@@ -118,6 +118,14 @@ CREATE TABLE IF NOT EXISTS agenda_items (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- Persistent session store so logins survive a server restart/redeploy
+-- instead of the default express-session MemoryStore losing everyone.
+CREATE TABLE IF NOT EXISTS sessions (
+  sid     TEXT PRIMARY KEY,
+  sess    TEXT NOT NULL,
+  expires INTEGER NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_tasks_user ON tasks(user_id);
 CREATE INDEX IF NOT EXISTS idx_events_user ON events(user_id);
 CREATE INDEX IF NOT EXISTS idx_contacts_user ON contacts(user_id);
