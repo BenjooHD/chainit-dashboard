@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- Admins bypass this table entirely. A user with no row for an area has no access to it.
 CREATE TABLE IF NOT EXISTS permissions (
   user_id  INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  area     TEXT NOT NULL CHECK (area IN ('calendar','tasks','contacts','projects','mail','agenda')),
+  area     TEXT NOT NULL CHECK (area IN ('calendar','tasks','contacts','projects','mail','agenda','costs')),
   can_view INTEGER NOT NULL DEFAULT 0,
   can_edit INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (user_id, area)
@@ -111,6 +111,20 @@ CREATE TABLE IF NOT EXISTS contacts (
   notes      TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS costs (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  project_id INTEGER REFERENCES projects(id) ON DELETE SET NULL,
+  title      TEXT NOT NULL,
+  amount     REAL NOT NULL,
+  category   TEXT,
+  cost_date  TEXT,
+  notes      TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_costs_user ON costs(user_id);
 
 CREATE TABLE IF NOT EXISTS agenda_items (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,

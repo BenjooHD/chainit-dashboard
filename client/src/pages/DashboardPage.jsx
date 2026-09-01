@@ -10,6 +10,7 @@ import ProjectsPanel from '../components/projects/ProjectsPanel';
 import MailPanel from '../components/mail/MailPanel';
 import MailTopStrip from '../components/mail/MailTopStrip';
 import AgendaPanel from '../components/agenda/AgendaPanel';
+import CostsPanel from '../components/costs/CostsPanel';
 import AdminPanel from '../components/admin/AdminPanel';
 import ChatWidget from '../components/chat/ChatWidget';
 import PendingApproval from '../components/common/PendingApproval';
@@ -43,6 +44,7 @@ export default function DashboardPage() {
   const canProjects = can('projects', 'view');
   const canMail = can('mail', 'view');
   const canAgenda = can('agenda', 'view');
+  const canCosts = can('costs', 'view');
   const canAdmin = !!user?.isAdmin;
 
   const sectionDefs = [
@@ -50,6 +52,7 @@ export default function DashboardPage() {
     { key: 'tasks', label: 'Aufgaben', show: canTasks },
     { key: 'contacts', label: 'Kontakte', show: canContacts },
     { key: 'projects', label: 'Projekte', show: canProjects },
+    { key: 'costs', label: 'Kosten', show: canCosts },
     { key: 'mail', label: 'Mail', show: canMail },
     { key: 'agenda', label: 'Besprechung', show: canAgenda },
     { key: 'admin', label: 'Team verwalten', show: canAdmin },
@@ -105,6 +108,10 @@ export default function DashboardPage() {
         importantEvents={importantEvents}
         upcomingTasks={upcomingTasks}
         onJumpToUrgent={scrollToUrgent}
+        onLogoClick={() => {
+          setActiveSection(null);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
         canMail={canMail}
         mailMessages={mailRestMessages}
         mailNotConfigured={mailNotConfigured}
@@ -148,6 +155,7 @@ export default function DashboardPage() {
               {canTasks && <TaskBoard tasksHook={tasksHook} readOnly={!can('tasks', 'edit')} />}
               {canContacts && <ContactsTable contactsHook={contactsHook} readOnly={!can('contacts', 'edit')} />}
               {canProjects && <ProjectsPanel readOnly={!can('projects', 'edit')} />}
+              {canCosts && <CostsPanel readOnly={!can('costs', 'edit')} />}
               {canAgenda && <AgendaPanel readOnly={!can('agenda', 'edit')} />}
             </>
           ) : (
@@ -162,6 +170,7 @@ export default function DashboardPage() {
                 <ContactsTable contactsHook={contactsHook} readOnly={!can('contacts', 'edit')} />
               )}
               {activeSection === 'projects' && canProjects && <ProjectsPanel readOnly={!can('projects', 'edit')} />}
+              {activeSection === 'costs' && canCosts && <CostsPanel readOnly={!can('costs', 'edit')} />}
               {activeSection === 'mail' && canMail && (
                 <MailPanel
                   messages={mailMessages}

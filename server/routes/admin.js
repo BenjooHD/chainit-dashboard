@@ -2,7 +2,7 @@ const express = require('express');
 const db = require('../db/connection');
 
 const router = express.Router();
-const AREAS = ['calendar', 'tasks', 'contacts', 'projects', 'mail', 'agenda'];
+const AREAS = ['calendar', 'tasks', 'contacts', 'projects', 'mail', 'agenda', 'costs'];
 
 function getPermissions(userId) {
   const rows = db.prepare('SELECT area, can_view, can_edit FROM permissions WHERE user_id = ?').all(userId);

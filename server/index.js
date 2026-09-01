@@ -22,6 +22,7 @@ const notificationsRouter = require('./routes/notifications');
 const searchRouter = require('./routes/search');
 const mailRouter = require('./routes/mail');
 const agendaRouter = require('./routes/agenda');
+const costsRouter = require('./routes/costs');
 
 initDb();
 SqliteSessionStore.sweepExpired();
@@ -69,6 +70,7 @@ app.use('/api/notifications', requireAuth, notificationsRouter);
 app.use('/api/search', requireAuth, searchRouter);
 app.use('/api/mail', requireAuth, mailRouter);
 app.use('/api/agenda', requireAuth, agendaRouter);
+app.use('/api/costs', requireAuth, costsRouter);
 
 if (IS_PRODUCTION) {
   const clientDist = path.join(__dirname, '..', 'client', 'dist');

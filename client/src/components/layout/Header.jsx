@@ -21,6 +21,7 @@ export default function Header({
   importantEvents = [],
   upcomingTasks = [],
   onJumpToUrgent,
+  onLogoClick,
   canMail = false,
   mailMessages = [],
   mailNotConfigured = false,
@@ -39,13 +40,13 @@ export default function Header({
 
   return (
     <header className="header">
-      <div className="header-brand">
+      <button className="header-brand" onClick={onLogoClick} title="Zur Startseite">
         <ChainItLogo />
         <div>
           <div className="header-title">ChainIt</div>
           <div className="header-subtitle">Dashboard</div>
         </div>
-      </div>
+      </button>
 
       {hasUrgent && (
         <button className="header-urgent" onClick={onJumpToUrgent}>
