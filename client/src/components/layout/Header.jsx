@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useClickOutside } from '../../hooks/useClickOutside';
 import AccountSettingsModal from './AccountSettingsModal';
 import NotificationBell from './NotificationBell';
+import MailBell from './MailBell';
 import SearchBar from './SearchBar';
 import './Header.css';
 
@@ -14,10 +16,20 @@ function truncate(text, max = 20) {
   return text.length > max ? `${text.slice(0, max - 1)}…` : text;
 }
 
-export default function Header({ overdueTasks = [], importantEvents = [], upcomingTasks = [], onJumpToUrgent }) {
+export default function Header({
+  overdueTasks = [],
+  importantEvents = [],
+  upcomingTasks = [],
+  onJumpToUrgent,
+  canMail = false,
+  mailMessages = [],
+  mailNotConfigured = false,
+}) {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const accountRef = useRef(null);
+  useClickOutside(accountRef, () => setOpen(false), open);
 
   const hasUrgent = overdueTasks.length > 0 || importantEvents.length > 0 || upcomingTasks.length > 0;
 
@@ -60,9 +72,10 @@ export default function Header({ overdueTasks = [], importantEvents = [], upcomi
 
       <div className="header-right">
         <SearchBar />
+        {canMail && <MailBell messages={mailMessages} notConfigured={mailNotConfigured} />}
         <NotificationBell />
 
-        <div className="header-account">
+        <div className="header-account" ref={accountRef}>
           <button className="account-trigger" onClick={() => setOpen((o) => !o)}>
             <span className="account-avatar">{user?.username?.[0]?.toUpperCase() ?? '?'}</span>
             <span className="account-name">{user?.username}</span>

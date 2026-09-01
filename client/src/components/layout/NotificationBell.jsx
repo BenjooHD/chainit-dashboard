@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNotifications } from '../../hooks/useNotifications';
+import { useClickOutside } from '../../hooks/useClickOutside';
 
 function timeAgo(iso) {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -14,6 +15,8 @@ function timeAgo(iso) {
 export default function NotificationBell() {
   const { notifications, unreadCount, markAllRead } = useNotifications();
   const [open, setOpen] = useState(false);
+  const containerRef = useRef(null);
+  useClickOutside(containerRef, () => setOpen(false), open);
 
   const handleToggle = () => {
     setOpen((o) => {
@@ -23,7 +26,7 @@ export default function NotificationBell() {
   };
 
   return (
-    <div className="header-notif">
+    <div className="header-notif" ref={containerRef}>
       <button className="header-notif-trigger" onClick={handleToggle} title="Benachrichtigungen">
         🔔
         {unreadCount > 0 && <span className="header-notif-badge">{unreadCount}</span>}

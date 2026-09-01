@@ -8,6 +8,7 @@ import CalendarMonthView from '../components/calendar/CalendarMonthView';
 import ContactsTable from '../components/contacts/ContactsTable';
 import ProjectsPanel from '../components/projects/ProjectsPanel';
 import MailPanel from '../components/mail/MailPanel';
+import MailTopStrip from '../components/mail/MailTopStrip';
 import AgendaPanel from '../components/agenda/AgendaPanel';
 import AdminPanel from '../components/admin/AdminPanel';
 import ChatWidget from '../components/chat/ChatWidget';
@@ -17,6 +18,7 @@ import { useStats } from '../hooks/useStats';
 import { useTasks } from '../hooks/useTasks';
 import { useContacts } from '../hooks/useContacts';
 import { useUpcomingEvents } from '../hooks/useUpcomingEvents';
+import { useMailList } from '../hooks/useMail';
 import './Dashboard.css';
 
 const UPCOMING_DAYS = 5;
@@ -53,6 +55,13 @@ export default function DashboardPage() {
     UPCOMING_DAYS,
     canCalendar
   );
+  const {
+    messages: mailMessages,
+    loading: mailLoading,
+    notConfigured: mailNotConfigured,
+    error: mailError,
+    refresh: refreshMail,
+  } = useMailList(canMail);
   const importantEvents = upcomingEvents.filter((e) => e.priority === 'high');
 
   const todayStr = dateKey(new Date());
@@ -81,7 +90,18 @@ export default function DashboardPage() {
         importantEvents={importantEvents}
         upcomingTasks={upcomingTasks}
         onJumpToUrgent={scrollToUrgent}
+        canMail={canMail}
+        mailMessages={mailMessages}
+        mailNotConfigured={mailNotConfigured}
       />
+      {canMail && (
+        <MailTopStrip
+          messages={mailMessages}
+          loading={mailLoading}
+          notConfigured={mailNotConfigured}
+          error={mailError}
+        />
+      )}
       {hasAnyAccess && (
         <QuickNav
           sections={[
@@ -132,7 +152,13 @@ export default function DashboardPage() {
             )}
             {canMail && (
               <div ref={mailRef}>
-                <MailPanel />
+                <MailPanel
+                  messages={mailMessages}
+                  loading={mailLoading}
+                  error={mailError}
+                  notConfigured={mailNotConfigured}
+                  refresh={refreshMail}
+                />
               </div>
             )}
             {canAgenda && (

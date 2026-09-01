@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { apiGet } from '../api/client';
 
-export function useMailList() {
+export function useMailList(enabled = true) {
   const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState(null);
   const [notConfigured, setNotConfigured] = useState(false);
 
@@ -23,8 +23,8 @@ export function useMailList() {
   }, []);
 
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    if (enabled) refresh();
+  }, [refresh, enabled]);
 
   return { messages, loading, error, notConfigured, refresh };
 }

@@ -133,6 +133,9 @@
 .header-notif-item:last-child {
   border-bottom: none;
 }
+.header-notif-item-unseen {
+  font-weight: 700;
+}
 
 .header-notif-time {
   color: var(--color-text-muted);
