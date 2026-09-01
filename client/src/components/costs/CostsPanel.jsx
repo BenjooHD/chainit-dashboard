@@ -22,6 +22,8 @@ export default function CostsPanel({ readOnly = false }) {
   const [pendingDelete, setPendingDelete] = useState(null);
 
   const total = costs.reduce((sum, c) => sum + c.amount, 0);
+  const ausgabenTotal = costs.filter((c) => c.status === 'ausgabe').reduce((sum, c) => sum + c.amount, 0);
+  const geplantTotal = costs.filter((c) => c.status === 'geplant').reduce((sum, c) => sum + c.amount, 0);
 
   const handleSave = async (payload) => {
     if (editingCost) {
@@ -46,6 +48,9 @@ export default function CostsPanel({ readOnly = false }) {
       {!loading && costs.length > 0 && (
         <div className="costs-total">
           Summe: <strong>{formatAmount(total)} €</strong>
+          <span className="costs-total-breakdown">
+            Ausgaben: {formatAmount(ausgabenTotal)} € · Geplant: {formatAmount(geplantTotal)} €
+          </span>
         </div>
       )}
 
@@ -58,6 +63,7 @@ export default function CostsPanel({ readOnly = false }) {
               <tr>
                 <th>Titel</th>
                 <th>Kategorie</th>
+                <th>Status</th>
                 <th>Datum</th>
                 <th className="costs-table-amount">Betrag</th>
               </tr>
@@ -71,6 +77,11 @@ export default function CostsPanel({ readOnly = false }) {
                 >
                   <td>{c.title}</td>
                   <td>{c.category || '–'}</td>
+                  <td>
+                    <span className={`costs-status-badge costs-status-${c.status}`}>
+                      {c.status === 'geplant' ? 'Geplant' : 'Ausgabe'}
+                    </span>
+                  </td>
                   <td>{formatDate(c.date)}</td>
                   <td className="costs-table-amount">{formatAmount(c.amount)} €</td>
                 </tr>

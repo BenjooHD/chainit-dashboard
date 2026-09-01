@@ -61,14 +61,17 @@ function migrate() {
   if (!columnExists('projects', 'deadline')) {
     db.exec('ALTER TABLE projects ADD COLUMN deadline TEXT');
   }
+  if (!columnExists('costs', 'status')) {
+    db.exec("ALTER TABLE costs ADD COLUMN status TEXT NOT NULL DEFAULT 'ausgabe'");
+  }
 
   // SQLite can't ALTER a CHECK constraint, so widening the allowed `area`
   // values means recreating the table and copying rows.
-  if (!tableSql('permissions').includes("'costs'")) {
+  if (!tableSql('permissions').includes("'invoices'")) {
     db.exec(`
       CREATE TABLE permissions_new (
         user_id  INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        area     TEXT NOT NULL CHECK (area IN ('calendar','tasks','contacts','projects','mail','agenda','costs')),
+        area     TEXT NOT NULL CHECK (area IN ('calendar','tasks','contacts','projects','mail','agenda','costs','invoices')),
         can_view INTEGER NOT NULL DEFAULT 0,
         can_edit INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY (user_id, area)
@@ -78,6 +81,9 @@ function migrate() {
       ALTER TABLE permissions_new RENAME TO permissions;
     `);
   }
+
+  // Seed the single invoice_settings row so every read can assume it exists.
+  db.prepare('INSERT OR IGNORE INTO invoice_settings (id) VALUES (1)').run();
 
   // Bootstrap: if no admin exists yet, promote the earliest-created account.
   // Covers both a fresh install's first registrant and an existing database

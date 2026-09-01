@@ -1,0 +1,112 @@
+.invoice-status-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+}
+.invoice-status-offen {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+.invoice-status-bezahlt {
+  color: var(--color-success);
+  border-color: var(--color-success);
+}
+.invoice-status-storniert {
+  color: var(--color-text-muted);
+}
+
+.invoice-form-panel {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-modal);
+  width: 100%;
+  max-width: 760px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.invoice-form-body {
+  padding: 1.25rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.invoice-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+
+.invoice-form-span2 {
+  grid-column: span 2;
+}
+
+.invoice-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.invoice-items-header,
+.invoice-item-row {
+  display: grid;
+  grid-template-columns: 1fr 80px 100px 90px 28px;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.invoice-items-header {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  letter-spacing: 0.03em;
+}
+
+.invoice-item-total {
+  font-size: 0.85rem;
+  text-align: right;
+}
+
+.invoice-totals {
+  max-width: 280px;
+  margin-left: auto;
+  width: 100%;
+}
+
+.totals-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  padding: 0.2rem 0;
+}
+
+.totals-row-final {
+  font-weight: 700;
+  font-size: 1rem;
+  border-top: 1px solid var(--color-border);
+  margin-top: 0.3rem;
+  padding-top: 0.5rem;
+}
+
+@media (max-width: 700px) {
+  .invoice-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .invoice-form-span2 {
+    grid-column: span 1;
+  }
+  .invoice-items-header {
+    display: none;
+  }
+  .invoice-item-row {
+    grid-template-columns: 1fr;
+  }
+}

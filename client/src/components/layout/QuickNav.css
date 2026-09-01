@@ -1,6 +1,6 @@
 .quick-nav {
   position: sticky;
-  top: 0;
+  top: 72px;
   z-index: 40;
   display: flex;
   gap: 0.5rem;

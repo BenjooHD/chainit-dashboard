@@ -9,6 +9,7 @@ const AREAS = [
   { key: 'mail', label: 'Mail' },
   { key: 'agenda', label: 'Besprechung' },
   { key: 'costs', label: 'Kosten' },
+  { key: 'invoices', label: 'Rechnungen' },
 ];
 
 export default function AdminUserRow({ user, onSave }) {

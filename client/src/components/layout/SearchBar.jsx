@@ -8,6 +8,7 @@ const GROUP_LABELS = {
   documents: 'Unterlagen',
   agenda: 'Besprechung',
   costs: 'Kosten',
+  invoices: 'Rechnungen',
 };
 
 export default function SearchBar() {

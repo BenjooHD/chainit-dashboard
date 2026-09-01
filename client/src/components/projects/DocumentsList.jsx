@@ -2,7 +2,12 @@ import { useRef, useState } from 'react';
 import { useDocuments } from '../../hooks/useDocuments';
 import ConfirmDialog from '../common/ConfirmDialog';
 import Button from '../common/Button';
+import DocumentPreviewModal from './DocumentPreviewModal';
 import './Projects.css';
+
+function isPreviewable(mimeType) {
+  return mimeType?.startsWith('image/') || mimeType === 'application/pdf';
+}
 
 function formatSize(bytes) {
   if (bytes < 1024) return `${bytes} B`;
@@ -21,6 +26,7 @@ export default function DocumentsList({ projectId, readOnly }) {
   const [linkUrl, setLinkUrl] = useState('');
   const [linkError, setLinkError] = useState(null);
   const [savingLink, setSavingLink] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState(null);
 
   const handleFileChosen = async (e) => {
     const file = e.target.files?.[0];
@@ -124,14 +130,20 @@ export default function DocumentsList({ projectId, readOnly }) {
               </li>
             ) : (
               <li key={`file-${d.id}`} className="documents-item">
-                <a
-                  href={`/api/documents/${d.id}/file`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="documents-item-link"
-                >
-                  📄 {d.title}
-                </a>
+                {isPreviewable(d.mimeType) ? (
+                  <button className="documents-item-link documents-item-link-btn" onClick={() => setPreviewDoc(d)}>
+                    {d.mimeType.startsWith('image/') ? '🖼️' : '📕'} {d.title}
+                  </button>
+                ) : (
+                  <a
+                    href={`/api/documents/${d.id}/file`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="documents-item-link"
+                  >
+                    📄 {d.title}
+                  </a>
+                )}
                 <span className="documents-item-meta">{formatSize(d.sizeBytes)}</span>
                 {!readOnly && (
                   <button className="documents-item-delete" onClick={() => setPendingDelete(d)} title="Löschen">
@@ -143,6 +155,8 @@ export default function DocumentsList({ projectId, readOnly }) {
           )}
         </ul>
       )}
+
+      {previewDoc && <DocumentPreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />}
 
       {pendingDelete && (
         <ConfirmDialog

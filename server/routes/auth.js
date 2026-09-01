@@ -9,7 +9,7 @@ const router = express.Router();
 const TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24h
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const AREAS = ['calendar', 'tasks', 'contacts', 'projects', 'mail', 'agenda', 'costs'];
+const AREAS = ['calendar', 'tasks', 'contacts', 'projects', 'mail', 'agenda', 'costs', 'invoices'];
 
 function getPermissions(userId) {
   const rows = db.prepare('SELECT area, can_view, can_edit FROM permissions WHERE user_id = ?').all(userId);

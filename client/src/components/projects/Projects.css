@@ -260,6 +260,15 @@
   color: var(--color-accent);
 }
 
+.documents-item-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
 .documents-item-meta {
   font-size: 0.72rem;
   color: var(--color-text-muted);
@@ -275,4 +284,41 @@
 }
 .documents-item-delete:hover {
   color: var(--color-danger);
+}
+
+.document-preview-panel {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-modal);
+  width: 100%;
+  max-width: 860px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.document-preview-body {
+  padding: 1rem 1.25rem;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+}
+
+.document-preview-image {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+
+.document-preview-frame {
+  width: 100%;
+  height: 70vh;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: #fff;
 }

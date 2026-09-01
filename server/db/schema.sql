@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- Admins bypass this table entirely. A user with no row for an area has no access to it.
 CREATE TABLE IF NOT EXISTS permissions (
   user_id  INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  area     TEXT NOT NULL CHECK (area IN ('calendar','tasks','contacts','projects','mail','agenda','costs')),
+  area     TEXT NOT NULL CHECK (area IN ('calendar','tasks','contacts','projects','mail','agenda','costs','invoices')),
   can_view INTEGER NOT NULL DEFAULT 0,
   can_edit INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (user_id, area)
@@ -134,6 +134,7 @@ CREATE TABLE IF NOT EXISTS costs (
   amount     REAL NOT NULL,
   category   TEXT,
   cost_date  TEXT,
+  status     TEXT NOT NULL DEFAULT 'ausgabe' CHECK (status IN ('geplant','ausgabe')),
   notes      TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -156,6 +157,57 @@ CREATE TABLE IF NOT EXISTS sessions (
   sess    TEXT NOT NULL,
   expires INTEGER NOT NULL
 );
+
+-- One row per calendar day a reminder digest run has completed, so the
+-- interval-based scheduler in server/reminders.js never double-sends.
+CREATE TABLE IF NOT EXISTS reminder_runs (
+  run_date TEXT PRIMARY KEY
+);
+
+-- Single-row table (id is always 1) holding the company/bank details and
+-- VAT mode used to render every invoice plus the next sequential number.
+CREATE TABLE IF NOT EXISTS invoice_settings (
+  id               INTEGER PRIMARY KEY CHECK (id = 1),
+  company_name     TEXT,
+  company_address  TEXT,
+  tax_id           TEXT,
+  vat_mode         TEXT NOT NULL DEFAULT 'unset' CHECK (vat_mode IN ('unset', 'standard', 'kleinunternehmer')),
+  default_vat_rate REAL NOT NULL DEFAULT 19,
+  bank_name        TEXT,
+  bank_iban        TEXT,
+  bank_bic         TEXT,
+  footer_note      TEXT,
+  invoice_prefix   TEXT NOT NULL DEFAULT 'RE',
+  next_seq         INTEGER NOT NULL DEFAULT 1
+);
+
+CREATE TABLE IF NOT EXISTS invoices (
+  id                INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id           INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  invoice_number    TEXT NOT NULL UNIQUE,
+  contact_id        INTEGER REFERENCES contacts(id) ON DELETE SET NULL,
+  customer_name     TEXT NOT NULL,
+  customer_address  TEXT,
+  issue_date        TEXT NOT NULL,
+  service_date      TEXT,
+  due_date          TEXT,
+  vat_mode          TEXT NOT NULL DEFAULT 'standard' CHECK (vat_mode IN ('standard', 'kleinunternehmer')),
+  vat_rate          REAL NOT NULL DEFAULT 19,
+  status            TEXT NOT NULL DEFAULT 'offen' CHECK (status IN ('offen', 'bezahlt', 'storniert')),
+  notes             TEXT,
+  created_at        TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS invoice_items (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  invoice_id  INTEGER NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
+  position    INTEGER NOT NULL,
+  description TEXT NOT NULL,
+  quantity    REAL NOT NULL DEFAULT 1,
+  unit_price  REAL NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_invoice_items_invoice ON invoice_items(invoice_id);
 
 CREATE INDEX IF NOT EXISTS idx_tasks_user ON tasks(user_id);
 CREATE INDEX IF NOT EXISTS idx_events_user ON events(user_id);

@@ -4,7 +4,6 @@ import Button from '../common/Button';
 import ConfirmDialog from '../common/ConfirmDialog';
 import ProjectFormModal from './ProjectFormModal';
 import ProjectDetailModal from './ProjectDetailModal';
-import DocumentsList from './DocumentsList';
 import './Projects.css';
 
 const STATUS_LABELS = { active: 'Aktiv', done: 'Abgeschlossen', archived: 'Archiviert' };
@@ -76,12 +75,6 @@ export default function ProjectsPanel({ readOnly = false }) {
             </div>
           </button>
         ))}
-      </div>
-
-      <div className="project-general-docs">
-        <h3 className="documents-heading">Allgemeine Unterlagen</h3>
-        <p className="documents-hint">Nicht an ein bestimmtes Projekt gebunden.</p>
-        <DocumentsList projectId={null} readOnly={readOnly} />
       </div>
 
       {(showCreate || editingProject) && (

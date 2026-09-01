@@ -8,6 +8,28 @@
   font-size: 1.05rem;
 }
 
+.costs-total-breakdown {
+  margin-left: 0.8rem;
+  font-size: 0.78rem;
+}
+
+.costs-status-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+}
+.costs-status-geplant {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+.costs-status-ausgabe {
+  color: var(--color-success);
+  border-color: var(--color-success);
+}
+
 .costs-table-wrap {
   overflow-x: auto;
 }

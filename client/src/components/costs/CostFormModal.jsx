@@ -7,6 +7,7 @@ export default function CostFormModal({ cost, onClose, onSave, onDelete }) {
   const [amount, setAmount] = useState(cost?.amount != null ? String(cost.amount) : '');
   const [category, setCategory] = useState(cost?.category || '');
   const [date, setDate] = useState(cost?.date || '');
+  const [status, setStatus] = useState(cost?.status || 'ausgabe');
   const [notes, setNotes] = useState(cost?.notes || '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -30,6 +31,7 @@ export default function CostFormModal({ cost, onClose, onSave, onDelete }) {
         amount: numAmount,
         category: category.trim() || null,
         date: date || null,
+        status,
         notes: notes.trim() || null,
       });
       onClose();
@@ -76,6 +78,25 @@ export default function CostFormModal({ cost, onClose, onSave, onDelete }) {
         <label>
           Datum
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+        </label>
+        <label>
+          Status
+          <div className="priority-btn-group">
+            <button
+              type="button"
+              className={`priority-btn ${status === 'geplant' ? 'priority-btn-active priority-btn-medium' : ''}`}
+              onClick={() => setStatus('geplant')}
+            >
+              Geplant
+            </button>
+            <button
+              type="button"
+              className={`priority-btn ${status === 'ausgabe' ? 'priority-btn-active priority-btn-low' : ''}`}
+              onClick={() => setStatus('ausgabe')}
+            >
+              Ausgabe (bezahlt)
+            </button>
+          </div>
         </label>
         <label>
           Notizen
