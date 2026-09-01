@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import AccountSettingsModal from './AccountSettingsModal';
+import NotificationBell from './NotificationBell';
+import SearchBar from './SearchBar';
 import './Header.css';
 
 function ChainItLogo() {
@@ -56,33 +58,38 @@ export default function Header({ overdueTasks = [], importantEvents = [], upcomi
         </button>
       )}
 
-      <div className="header-account">
-        <button className="account-trigger" onClick={() => setOpen((o) => !o)}>
-          <span className="account-avatar">{user?.username?.[0]?.toUpperCase() ?? '?'}</span>
-          <span className="account-name">{user?.username}</span>
-        </button>
+      <div className="header-right">
+        <SearchBar />
+        <NotificationBell />
 
-        {open && (
-          <div className="account-panel">
-            <div className="account-panel-name">
-              {user?.username}
-              {user?.isAdmin && <span className="account-admin-badge">Admin</span>}
+        <div className="header-account">
+          <button className="account-trigger" onClick={() => setOpen((o) => !o)}>
+            <span className="account-avatar">{user?.username?.[0]?.toUpperCase() ?? '?'}</span>
+            <span className="account-name">{user?.username}</span>
+          </button>
+
+          {open && (
+            <div className="account-panel">
+              <div className="account-panel-name">
+                {user?.username}
+                {user?.isAdmin && <span className="account-admin-badge">Admin</span>}
+              </div>
+              {user?.title && <div className="account-panel-title">{user.title}</div>}
+              <button
+                className="account-edit"
+                onClick={() => {
+                  setShowSettings(true);
+                  setOpen(false);
+                }}
+              >
+                Konto bearbeiten
+              </button>
+              <button className="account-logout" onClick={logout}>
+                Abmelden
+              </button>
             </div>
-            {user?.title && <div className="account-panel-title">{user.title}</div>}
-            <button
-              className="account-edit"
-              onClick={() => {
-                setShowSettings(true);
-                setOpen(false);
-              }}
-            >
-              Konto bearbeiten
-            </button>
-            <button className="account-logout" onClick={logout}>
-              Abmelden
-            </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {showSettings && <AccountSettingsModal onClose={() => setShowSettings(false)} />}

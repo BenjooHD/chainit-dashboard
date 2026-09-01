@@ -3,20 +3,36 @@ const db = require('../db/connection');
 
 const router = express.Router();
 
+router.get('/unread-count', (req, res) => {
+  const row = db
+    .prepare('SELECT COUNT(*) AS c FROM messages WHERE recipient_id = ? AND read_at IS NULL')
+    .get(req.session.userId);
+  res.json({ count: row.c });
+});
+
 router.get('/users', (req, res) => {
   const rows = db
     .prepare(
       `SELECT u.id, u.username, u.title,
         (SELECT MAX(m.created_at) FROM messages m
          WHERE (m.sender_id = ? AND m.recipient_id = u.id) OR (m.sender_id = u.id AND m.recipient_id = ?)
-        ) AS last_message_at
+        ) AS last_message_at,
+        (SELECT COUNT(*) FROM messages m
+         WHERE m.sender_id = u.id AND m.recipient_id = ? AND m.read_at IS NULL
+        ) AS unread_count
        FROM users u
        WHERE u.id != ?
        ORDER BY last_message_at IS NULL ASC, last_message_at DESC, u.username COLLATE NOCASE ASC`
     )
-    .all(req.session.userId, req.session.userId, req.session.userId);
+    .all(req.session.userId, req.session.userId, req.session.userId, req.session.userId);
   res.json(
-    rows.map((r) => ({ id: r.id, username: r.username, title: r.title || null, lastMessageAt: r.last_message_at }))
+    rows.map((r) => ({
+      id: r.id,
+      username: r.username,
+      title: r.title || null,
+      lastMessageAt: r.last_message_at,
+      unreadCount: r.unread_count,
+    }))
   );
 });
 
@@ -24,6 +40,10 @@ router.get('/:userId', (req, res) => {
   const otherId = Number(req.params.userId);
   const other = db.prepare('SELECT id FROM users WHERE id = ?').get(otherId);
   if (!other) return res.status(404).json({ error: 'User not found' });
+
+  db.prepare(
+    'UPDATE messages SET read_at = datetime(\'now\') WHERE sender_id = ? AND recipient_id = ? AND read_at IS NULL'
+  ).run(otherId, req.session.userId);
 
   const rows = db
     .prepare(

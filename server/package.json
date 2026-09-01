@@ -14,7 +14,9 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "express-session": "^1.18.1",
-    "multer": "^2.0.1"
+    "multer": "^2.0.1",
+    "imapflow": "^1.0.171",
+    "mailparser": "^3.7.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"

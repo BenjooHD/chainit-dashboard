@@ -26,11 +26,25 @@ CREATE TABLE IF NOT EXISTS messages (
   sender_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   recipient_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   body         TEXT NOT NULL,
+  read_at      TEXT,
   created_at   TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_messages_sender ON messages(sender_id, recipient_id);
 CREATE INDEX IF NOT EXISTS idx_messages_recipient ON messages(recipient_id, sender_id);
+
+-- Generic in-app notifications (task assignments today, room for more types later).
+CREATE TABLE IF NOT EXISTS notifications (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type       TEXT NOT NULL,
+  message    TEXT NOT NULL,
+  link       TEXT,
+  read_at    TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, read_at);
 
 CREATE TABLE IF NOT EXISTS projects (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -80,6 +94,7 @@ CREATE TABLE IF NOT EXISTS events (
   end_at      TEXT NOT NULL,
   location    TEXT,
   priority    TEXT NOT NULL DEFAULT 'medium' CHECK (priority IN ('low','medium','high')),
+  recurrence_group TEXT,
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

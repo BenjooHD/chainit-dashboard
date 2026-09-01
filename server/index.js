@@ -17,6 +17,9 @@ const adminRouter = require('./routes/admin');
 const messagesRouter = require('./routes/messages');
 const projectsRouter = require('./routes/projects');
 const documentsRouter = require('./routes/documents');
+const notificationsRouter = require('./routes/notifications');
+const searchRouter = require('./routes/search');
+const mailRouter = require('./routes/mail');
 
 initDb();
 
@@ -58,6 +61,9 @@ app.use('/api/admin', requireAuth, requireAdmin, adminRouter);
 app.use('/api/messages', requireAuth, messagesRouter);
 app.use('/api/projects', requireAuth, projectsRouter);
 app.use('/api/documents', requireAuth, documentsRouter);
+app.use('/api/notifications', requireAuth, notificationsRouter);
+app.use('/api/search', requireAuth, searchRouter);
+app.use('/api/mail', requireAuth, mailRouter);
 
 if (IS_PRODUCTION) {
   const clientDist = path.join(__dirname, '..', 'client', 'dist');

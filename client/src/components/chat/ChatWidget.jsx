@@ -58,10 +58,18 @@ export default function ChatWidget({ open, setOpen }) {
   const { users, loading, refresh: refreshUsers } = useChatUsers();
   const [selected, setSelected] = useState(null);
 
+  const totalUnread = users.reduce((sum, u) => sum + (u.unreadCount || 0), 0);
+
+  const handleSelect = (u) => {
+    setSelected(u);
+    setTimeout(refreshUsers, 300); // let the server mark-as-read finish, then refresh badges
+  };
+
   return (
     <>
       <button className="chat-fab" onClick={() => setOpen((o) => !o)}>
         {open ? '✕' : '💬'}
+        {!open && totalUnread > 0 && <span className="chat-fab-badge">{totalUnread}</span>}
       </button>
 
       {open && (
@@ -80,13 +88,14 @@ export default function ChatWidget({ open, setOpen }) {
                 <button
                   key={u.id}
                   className={`chat-user-item ${selected?.id === u.id ? 'chat-user-item-active' : ''}`}
-                  onClick={() => setSelected(u)}
+                  onClick={() => handleSelect(u)}
                 >
                   <span className="chat-user-avatar">{u.username[0]?.toUpperCase()}</span>
                   <span>
                     <div>{u.username}</div>
                     {u.title && <div className="chat-user-title">{u.title}</div>}
                   </span>
+                  {u.unreadCount > 0 && <span className="chat-user-unread">{u.unreadCount}</span>}
                 </button>
               ))}
             </div>

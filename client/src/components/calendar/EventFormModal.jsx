@@ -15,7 +15,7 @@ const PRIORITIES = [
   { value: 'high', label: 'Hoch' },
 ];
 
-export default function EventFormModal({ event, defaultDate, onClose, onSave, onDelete }) {
+export default function EventFormModal({ event, defaultDate, onClose, onSave, onDelete, onDeleteSeries }) {
   const [title, setTitle] = useState(event?.title || '');
   const [description, setDescription] = useState(event?.description || '');
   const [location, setLocation] = useState(event?.location || '');
@@ -24,8 +24,22 @@ export default function EventFormModal({ event, defaultDate, onClose, onSave, on
     event ? toLocalInput(event.startAt) : `${defaultDate}T09:00`
   );
   const [endAt, setEndAt] = useState(event ? toLocalInput(event.endAt) : `${defaultDate}T10:00`);
+  const [recurrence, setRecurrence] = useState('none');
+  const [recurrenceCount, setRecurrenceCount] = useState(4);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+
+  const handleStartChange = (value) => {
+    setStartAt(value);
+    if (value) {
+      const start = new Date(value);
+      const end = new Date(start.getTime() + 60 * 60 * 1000);
+      const pad = (n) => String(n).padStart(2, '0');
+      setEndAt(
+        `${end.getFullYear()}-${pad(end.getMonth() + 1)}-${pad(end.getDate())}T${pad(end.getHours())}:${pad(end.getMinutes())}`
+      );
+    }
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -47,6 +61,7 @@ export default function EventFormModal({ event, defaultDate, onClose, onSave, on
         priority,
         startAt,
         endAt,
+        ...(!event && recurrence !== 'none' ? { recurrence, recurrenceCount } : {}),
       });
       onClose();
     } catch (err) {
@@ -63,9 +78,16 @@ export default function EventFormModal({ event, defaultDate, onClose, onSave, on
       footer={
         <>
           {event ? (
-            <Button variant="danger" type="button" onClick={() => onDelete(event.id)}>
-              Löschen
-            </Button>
+            <span style={{ display: 'flex', gap: '0.5rem' }}>
+              <Button variant="danger" type="button" onClick={() => onDelete(event.id)}>
+                Löschen
+              </Button>
+              {event.recurrenceGroup && (
+                <Button variant="danger" type="button" onClick={() => onDeleteSeries(event.id)}>
+                  Serie löschen
+                </Button>
+              )}
+            </span>
           ) : (
             <span />
           )}
@@ -106,12 +128,37 @@ export default function EventFormModal({ event, defaultDate, onClose, onSave, on
         </label>
         <label>
           Start
-          <input type="datetime-local" value={startAt} onChange={(e) => setStartAt(e.target.value)} />
+          <input type="datetime-local" value={startAt} onChange={(e) => handleStartChange(e.target.value)} />
         </label>
         <label>
           Ende
           <input type="datetime-local" value={endAt} onChange={(e) => setEndAt(e.target.value)} />
         </label>
+        {!event && (
+          <>
+            <label>
+              Wiederholung
+              <select value={recurrence} onChange={(e) => setRecurrence(e.target.value)}>
+                <option value="none">Keine</option>
+                <option value="daily">Täglich</option>
+                <option value="weekly">Wöchentlich</option>
+                <option value="monthly">Monatlich</option>
+              </select>
+            </label>
+            {recurrence !== 'none' && (
+              <label>
+                Anzahl Wiederholungen
+                <input
+                  type="number"
+                  min={1}
+                  max={52}
+                  value={recurrenceCount}
+                  onChange={(e) => setRecurrenceCount(e.target.value)}
+                />
+              </label>
+            )}
+          </>
+        )}
       </form>
     </Modal>
   );

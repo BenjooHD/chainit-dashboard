@@ -39,7 +39,12 @@ export default function TaskBoard({ tasksHook, readOnly = false }) {
     <section className="panel">
       <div className="panel-header">
         <h2>Aufgaben</h2>
-        {!readOnly && <Button onClick={() => setShowCreate(true)}>+ Aufgabe</Button>}
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <a className="btn btn-secondary" href="/api/tasks/export.csv" download>
+            CSV Export
+          </a>
+          {!readOnly && <Button onClick={() => setShowCreate(true)}>+ Aufgabe</Button>}
+        </div>
       </div>
 
       <div className="task-board">

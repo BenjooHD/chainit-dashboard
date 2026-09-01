@@ -1,6 +1,7 @@
 const express = require('express');
 const db = require('../db/connection');
 const requirePermission = require('../middleware/requirePermission');
+const { sendCsv } = require('../csv');
 
 const router = express.Router();
 
@@ -22,6 +23,16 @@ function serializeContact(row) {
 router.get('/', canView, (req, res) => {
   const rows = db.prepare('SELECT * FROM contacts ORDER BY full_name ASC').all();
   res.json(rows.map(serializeContact));
+});
+
+router.get('/export.csv', canView, (req, res) => {
+  const rows = db.prepare('SELECT * FROM contacts ORDER BY full_name ASC').all();
+  sendCsv(
+    res,
+    'kontakte.csv',
+    ['Name', 'Firma', 'E-Mail', 'Telefon', 'Notizen'],
+    rows.map((r) => [r.full_name, r.company, r.email, r.phone, r.notes])
+  );
 });
 
 router.post('/', canEdit, (req, res) => {

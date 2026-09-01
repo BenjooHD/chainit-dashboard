@@ -22,7 +22,12 @@ export default function ContactsTable({ contactsHook, readOnly = false }) {
     <section className="panel">
       <div className="panel-header">
         <h2>Kontakte</h2>
-        {!readOnly && <Button onClick={() => setShowCreate(true)}>+ Kontakt</Button>}
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <a className="btn btn-secondary" href="/api/contacts/export.csv" download>
+            CSV Export
+          </a>
+          {!readOnly && <Button onClick={() => setShowCreate(true)}>+ Kontakt</Button>}
+        </div>
       </div>
 
       {contacts.length === 0 ? (

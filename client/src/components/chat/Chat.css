@@ -35,6 +35,17 @@
   border-color: var(--color-accent);
 }
 
+.chat-user-unread {
+  margin-left: auto;
+  background: var(--color-danger);
+  color: #201a33;
+  font-size: 0.68rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.1rem 0.4rem;
+  flex-shrink: 0;
+}
+
 .chat-user-avatar {
   width: 26px;
   height: 26px;
@@ -152,6 +163,23 @@
   cursor: pointer;
   box-shadow: var(--shadow-modal);
   z-index: 90;
+}
+
+.chat-fab-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: var(--color-danger);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
 }
 .chat-fab:hover {
   filter: brightness(1.08);

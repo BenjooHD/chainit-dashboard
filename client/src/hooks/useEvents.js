@@ -56,5 +56,14 @@ export function useEvents(monthDate, onChange) {
     [refresh, onChange]
   );
 
-  return { events, loading, error, refresh, create, update, remove };
+  const removeSeries = useCallback(
+    async (id) => {
+      await apiDelete(`/events/${id}?series=true`);
+      await refresh();
+      onChange?.();
+    },
+    [refresh, onChange]
+  );
+
+  return { events, loading, error, refresh, create, update, remove, removeSeries };
 }

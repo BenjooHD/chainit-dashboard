@@ -38,10 +38,11 @@ function dateKey(d) {
 
 export default function CalendarMonthView({ onChange, readOnly = false }) {
   const [monthDate, setMonthDate] = useState(() => startOfMonth(new Date()));
-  const { events, create, update, remove } = useEvents(monthDate, onChange);
+  const { events, create, update, remove, removeSeries } = useEvents(monthDate, onChange);
   const [modalDate, setModalDate] = useState(null);
   const [editingEvent, setEditingEvent] = useState(null);
   const [pendingDelete, setPendingDelete] = useState(null);
+  const [pendingDeleteSeries, setPendingDeleteSeries] = useState(false);
 
   const days = useMemo(() => buildMonthGrid(monthDate), [monthDate]);
   const today = new Date();
@@ -131,6 +132,12 @@ export default function CalendarMonthView({ onChange, readOnly = false }) {
           onSave={handleSave}
           onDelete={(id) => {
             setPendingDelete(id);
+            setPendingDeleteSeries(false);
+            setEditingEvent(null);
+          }}
+          onDeleteSeries={(id) => {
+            setPendingDelete(id);
+            setPendingDeleteSeries(true);
             setEditingEvent(null);
           }}
         />
@@ -138,11 +145,19 @@ export default function CalendarMonthView({ onChange, readOnly = false }) {
 
       {pendingDelete && (
         <ConfirmDialog
-          title="Termin löschen"
-          message="Diesen Termin wirklich löschen?"
+          title={pendingDeleteSeries ? 'Serie löschen' : 'Termin löschen'}
+          message={
+            pendingDeleteSeries
+              ? 'Alle Termine dieser Serie wirklich löschen?'
+              : 'Diesen Termin wirklich löschen?'
+          }
           onCancel={() => setPendingDelete(null)}
           onConfirm={async () => {
-            await remove(pendingDelete);
+            if (pendingDeleteSeries) {
+              await removeSeries(pendingDelete);
+            } else {
+              await remove(pendingDelete);
+            }
             setPendingDelete(null);
           }}
         />

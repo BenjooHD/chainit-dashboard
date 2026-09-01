@@ -1,6 +1,8 @@
 const express = require('express');
 const db = require('../db/connection');
 const requirePermission = require('../middleware/requirePermission');
+const { notify } = require('../notify');
+const { sendCsv } = require('../csv');
 
 const router = express.Router();
 
@@ -67,6 +69,24 @@ router.get('/assignees', canView, (req, res) => {
   res.json(rows);
 });
 
+router.get('/export.csv', canView, (req, res) => {
+  const rows = db.prepare(`${TASK_SELECT} ORDER BY t.created_at DESC`).all();
+  sendCsv(
+    res,
+    'aufgaben.csv',
+    ['Titel', 'Beschreibung', 'Status', 'Fällig am', 'Projekt', 'Zugewiesen an', 'Erstellt am'],
+    rows.map((r) => [
+      r.title,
+      r.description,
+      r.status,
+      r.due_date,
+      r.project_name,
+      r.assignee_username,
+      r.created_at,
+    ])
+  );
+});
+
 router.post('/', canEdit, (req, res) => {
   const { title, description, projectId, status, dueDate, assigneeId } = req.body || {};
   if (!title) return res.status(400).json({ error: 'title is required' });
@@ -91,6 +111,9 @@ router.post('/', canEdit, (req, res) => {
     );
 
   const row = db.prepare(`${TASK_SELECT} WHERE t.id = ?`).get(result.lastInsertRowid);
+  if (assigneeId && Number(assigneeId) !== req.session.userId) {
+    notify(assigneeId, 'task_assigned', `Dir wurde die Aufgabe "${row.title}" zugewiesen`, 'tasks');
+  }
   res.status(201).json(serializeTask(row));
 });
 
@@ -132,6 +155,13 @@ router.patch('/:id', canEdit, (req, res) => {
   );
 
   const row = db.prepare(`${TASK_SELECT} WHERE t.id = ?`).get(req.params.id);
+  if (
+    nextAssigneeId &&
+    Number(nextAssigneeId) !== existing.assignee_id &&
+    Number(nextAssigneeId) !== req.session.userId
+  ) {
+    notify(nextAssigneeId, 'task_assigned', `Dir wurde die Aufgabe "${row.title}" zugewiesen`, 'tasks');
+  }
   res.json(serializeTask(row));
 });
 
