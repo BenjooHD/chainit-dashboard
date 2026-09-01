@@ -3,8 +3,25 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const db = require('../db/connection');
 const { sendVerificationEmail } = require('../mail');
+const rateLimit = require('../middleware/rateLimit');
 
 const router = express.Router();
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: 'Too many login attempts. Please wait a few minutes and try again.',
+});
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: 'Too many accounts created from this connection. Please try again later.',
+});
+const passwordCheckLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: 'Too many attempts. Please wait a few minutes and try again.',
+});
 
 const TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24h
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -53,7 +70,7 @@ async function issueVerificationEmail(user) {
   await sendVerificationEmail({ to: user.email, username: user.username, verifyUrl });
 }
 
-router.post('/register', async (req, res) => {
+router.post('/register', registerLimiter, async (req, res) => {
   const { username, email, password } = req.body || {};
   if (!username || !email || !password) {
     return res.status(400).json({ error: 'username, email and password are required' });
@@ -127,7 +144,7 @@ router.post('/verify-email', (req, res) => {
   res.json({ ok: true });
 });
 
-router.post('/resend-verification', async (req, res) => {
+router.post('/resend-verification', passwordCheckLimiter, async (req, res) => {
   const { username, password } = req.body || {};
   if (!username || !password) {
     return res.status(400).json({ error: 'username and password are required' });
@@ -151,7 +168,7 @@ router.post('/resend-verification', async (req, res) => {
   res.json({ ok: true });
 });
 
-router.post('/login', (req, res) => {
+router.post('/login', loginLimiter, (req, res) => {
   const { username, password } = req.body || {};
   if (!username || !password) {
     return res.status(400).json({ error: 'username and password are required' });
@@ -187,7 +204,7 @@ router.get('/me', (req, res) => {
   res.json(publicUser(user));
 });
 
-router.patch('/me', (req, res) => {
+router.patch('/me', passwordCheckLimiter, (req, res) => {
   if (!req.session || !req.session.userId) {
     return res.status(401).json({ error: 'Not authenticated' });
   }
