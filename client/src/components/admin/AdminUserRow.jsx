@@ -10,6 +10,7 @@ const AREAS = [
   { key: 'agenda', label: 'Besprechung' },
   { key: 'costs', label: 'Kosten' },
   { key: 'invoices', label: 'Rechnungen' },
+  { key: 'feedback', label: 'Feedback' },
 ];
 
 export default function AdminUserRow({ user, onSave }) {

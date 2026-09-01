@@ -14,6 +14,7 @@ import AgendaPanel from '../components/agenda/AgendaPanel';
 import CostsPanel from '../components/costs/CostsPanel';
 import InvoicesPanel from '../components/invoices/InvoicesPanel';
 import AdminPanel from '../components/admin/AdminPanel';
+import FeedbackPanel from '../components/feedback/FeedbackPanel';
 import ChatWidget from '../components/chat/ChatWidget';
 import PendingApproval from '../components/common/PendingApproval';
 import { useAuth } from '../context/AuthContext';
@@ -48,6 +49,7 @@ export default function DashboardPage() {
   const canAgenda = can('agenda', 'view');
   const canCosts = can('costs', 'view');
   const canInvoices = can('invoices', 'view');
+  const canFeedback = can('feedback', 'view');
   const canAdmin = !!user?.isAdmin;
 
   const sectionDefs = [
@@ -59,6 +61,7 @@ export default function DashboardPage() {
     { key: 'costs', label: 'Kosten', show: canCosts },
     { key: 'mail', label: 'Mail', show: canMail },
     { key: 'agenda', label: 'Besprechung', show: canAgenda },
+    { key: 'feedback', label: 'Feedback', show: canFeedback },
     { key: 'invoices', label: 'Rechnungen', show: canInvoices },
     { key: 'admin', label: 'Team verwalten', show: canAdmin },
   ];
@@ -163,6 +166,7 @@ export default function DashboardPage() {
               {canProjects && <GeneralDocumentsPanel readOnly={!can('projects', 'edit')} />}
               {canCosts && <CostsPanel readOnly={!can('costs', 'edit')} />}
               {canAgenda && <AgendaPanel readOnly={!can('agenda', 'edit')} />}
+              {canFeedback && <FeedbackPanel />}
             </>
           ) : (
             <>
@@ -192,6 +196,7 @@ export default function DashboardPage() {
                 />
               )}
               {activeSection === 'agenda' && canAgenda && <AgendaPanel readOnly={!can('agenda', 'edit')} />}
+              {activeSection === 'feedback' && canFeedback && <FeedbackPanel />}
               {activeSection === 'invoices' && canInvoices && <InvoicesPanel readOnly={!can('invoices', 'edit')} />}
               {activeSection === 'admin' && canAdmin && <AdminPanel />}
             </>

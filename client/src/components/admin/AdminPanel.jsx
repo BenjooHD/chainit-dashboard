@@ -27,6 +27,7 @@ export default function AdminPanel() {
                 <th>Besprechung</th>
                 <th>Kosten</th>
                 <th>Rechnungen</th>
+                <th>Feedback</th>
                 <th>Rolle</th>
                 <th></th>
               </tr>

@@ -51,7 +51,9 @@ export function AuthProvider({ children }) {
 
   const hasAnyAccess =
     user?.isAdmin ||
-    ['calendar', 'tasks', 'contacts', 'projects', 'mail', 'agenda', 'costs', 'invoices'].some((a) => can(a, 'view'));
+    ['calendar', 'tasks', 'contacts', 'projects', 'mail', 'agenda', 'costs', 'invoices', 'feedback'].some((a) =>
+      can(a, 'view')
+    );
 
   return (
     <AuthContext.Provider

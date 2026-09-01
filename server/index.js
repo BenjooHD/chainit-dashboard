@@ -24,6 +24,7 @@ const mailRouter = require('./routes/mail');
 const agendaRouter = require('./routes/agenda');
 const costsRouter = require('./routes/costs');
 const invoicesRouter = require('./routes/invoices');
+const feedbackRouter = require('./routes/feedback');
 const { scheduleReminders } = require('./reminders');
 
 initDb();
@@ -75,6 +76,7 @@ app.use('/api/mail', requireAuth, mailRouter);
 app.use('/api/agenda', requireAuth, agendaRouter);
 app.use('/api/costs', requireAuth, costsRouter);
 app.use('/api/invoices', requireAuth, invoicesRouter);
+app.use('/api/feedback', requireAuth, feedbackRouter);
 
 if (IS_PRODUCTION) {
   const clientDist = path.join(__dirname, '..', 'client', 'dist');
