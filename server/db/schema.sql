@@ -52,7 +52,10 @@ CREATE TABLE IF NOT EXISTS projects (
   name        TEXT NOT NULL,
   description TEXT,
   status      TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','done','archived')),
+  priority    TEXT NOT NULL DEFAULT 'medium' CHECK (priority IN ('low','medium','high')),
   color       TEXT NOT NULL DEFAULT '#c4b5fd',
+  owner_id    INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  deadline    TEXT,
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

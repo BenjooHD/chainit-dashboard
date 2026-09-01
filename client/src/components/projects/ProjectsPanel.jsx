@@ -8,13 +8,27 @@ import DocumentsList from './DocumentsList';
 import './Projects.css';
 
 const STATUS_LABELS = { active: 'Aktiv', done: 'Abgeschlossen', archived: 'Archiviert' };
+const PRIORITY_LABELS = { low: 'Niedrig', medium: 'Mittel', high: 'Hoch' };
+
+function formatDeadline(dateStr) {
+  if (!dateStr) return null;
+  const [y, m, d] = dateStr.split('-');
+  return `${d}.${m}.${y}`;
+}
+
+function todayDateStr() {
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
 
 export default function ProjectsPanel({ readOnly = false }) {
-  const { projects, loading, create, update, remove } = useProjects();
+  const { projects, owners, loading, create, update, remove } = useProjects();
   const [showCreate, setShowCreate] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const [viewingProject, setViewingProject] = useState(null);
   const [pendingDelete, setPendingDelete] = useState(null);
+  const todayStr = todayDateStr();
 
   const handleSave = async (payload) => {
     if (editingProject) {
@@ -39,11 +53,26 @@ export default function ProjectsPanel({ readOnly = false }) {
           <button key={p.id} className="project-card" onClick={() => setViewingProject(p)}>
             <span className="project-card-color" style={{ background: p.color }} />
             <div className="project-card-body">
-              <div className="project-card-name">{p.name}</div>
+              <div className="project-card-name">
+                {p.name}
+                <span className={`project-priority-badge project-priority-badge-${p.priority}`}>
+                  {PRIORITY_LABELS[p.priority] || p.priority}
+                </span>
+              </div>
               <div className="project-card-meta">
                 {STATUS_LABELS[p.status] || p.status} · {p.documentCount} Unterlage
                 {p.documentCount === 1 ? '' : 'n'}
               </div>
+              {p.ownerName && <div className="project-card-owner">Ansprechpartner: {p.ownerName}</div>}
+              {p.deadline && (
+                <div
+                  className={`project-card-deadline ${
+                    p.status === 'active' && p.deadline < todayStr ? 'project-card-deadline-overdue' : ''
+                  }`}
+                >
+                  Deadline: {formatDeadline(p.deadline)}
+                </div>
+              )}
             </div>
           </button>
         ))}
@@ -58,6 +87,7 @@ export default function ProjectsPanel({ readOnly = false }) {
       {(showCreate || editingProject) && (
         <ProjectFormModal
           project={editingProject}
+          owners={owners}
           onClose={() => {
             setShowCreate(false);
             setEditingProject(null);

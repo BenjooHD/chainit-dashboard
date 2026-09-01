@@ -3,14 +3,16 @@ import { apiDelete, apiGet, apiPatch, apiPost } from '../api/client';
 
 export function useProjects() {
   const [projects, setProjects] = useState([]);
+  const [owners, setOwners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await apiGet('/projects');
+      const [data, ownerRows] = await Promise.all([apiGet('/projects'), apiGet('/projects/owners')]);
       setProjects(data);
+      setOwners(ownerRows);
       setError(null);
     } catch (e) {
       setError(e.message);
@@ -49,5 +51,5 @@ export function useProjects() {
     [refresh]
   );
 
-  return { projects, loading, error, refresh, create, update, remove };
+  return { projects, owners, loading, error, refresh, create, update, remove };
 }

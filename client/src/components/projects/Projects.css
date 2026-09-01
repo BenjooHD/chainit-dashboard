@@ -41,6 +41,28 @@
   color: var(--color-text-muted);
 }
 
+.project-card-owner {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  margin-top: 0.15rem;
+}
+
+.project-card-deadline {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  margin-top: 0.15rem;
+}
+
+.project-card-deadline-overdue {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.project-detail-deadline {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
 .project-status-badge {
   display: inline-block;
   font-size: 0.7rem;
@@ -50,11 +72,106 @@
   border-radius: 999px;
 }
 
+.project-priority-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  margin-left: 0.4rem;
+}
+.project-priority-badge-low {
+  color: var(--color-text-muted);
+}
+.project-priority-badge-medium {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+.project-priority-badge-high {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.project-detail-owner {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
 .project-detail-description {
   color: var(--color-text-muted);
   font-size: 0.85rem;
   margin: 0;
   white-space: pre-wrap;
+}
+
+.priority-btn-group {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.priority-btn {
+  flex: 1;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-input);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+.priority-btn:hover {
+  border-color: var(--color-accent);
+}
+
+.priority-btn-active.priority-btn-low {
+  background: rgba(163, 163, 163, 0.15);
+  border-color: var(--color-text-muted);
+  color: var(--color-text);
+}
+.priority-btn-active.priority-btn-medium {
+  background: rgba(196, 181, 253, 0.15);
+  border-color: var(--color-accent);
+  color: var(--color-text);
+}
+.priority-btn-active.priority-btn-high {
+  background: rgba(248, 113, 113, 0.15);
+  border-color: var(--color-danger);
+  color: var(--color-text);
+}
+
+.project-color-presets {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.project-color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+}
+.project-color-swatch:hover {
+  border-color: var(--color-text-muted);
+}
+.project-color-swatch-active {
+  border-color: var(--color-text);
+}
+
+.project-color-custom {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  cursor: pointer;
+  background: none;
 }
 
 .project-general-docs {

@@ -52,6 +52,15 @@ function migrate() {
   if (!columnExists('events', 'recurrence_group')) {
     db.exec('ALTER TABLE events ADD COLUMN recurrence_group TEXT');
   }
+  if (!columnExists('projects', 'priority')) {
+    db.exec("ALTER TABLE projects ADD COLUMN priority TEXT NOT NULL DEFAULT 'medium'");
+  }
+  if (!columnExists('projects', 'owner_id')) {
+    db.exec('ALTER TABLE projects ADD COLUMN owner_id INTEGER REFERENCES users(id) ON DELETE SET NULL');
+  }
+  if (!columnExists('projects', 'deadline')) {
+    db.exec('ALTER TABLE projects ADD COLUMN deadline TEXT');
+  }
 
   // SQLite can't ALTER a CHECK constraint, so widening the allowed `area`
   // values means recreating the table and copying rows.

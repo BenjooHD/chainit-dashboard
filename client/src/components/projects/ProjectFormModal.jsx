@@ -8,11 +8,22 @@ const STATUSES = [
   { value: 'archived', label: 'Archiviert' },
 ];
 
-export default function ProjectFormModal({ project, onClose, onSave, onDelete }) {
+const PRIORITIES = [
+  { value: 'low', label: 'Niedrig' },
+  { value: 'medium', label: 'Mittel' },
+  { value: 'high', label: 'Hoch' },
+];
+
+const COLOR_PRESETS = ['#c4b5fd', '#f87171', '#fb923c', '#facc15', '#4ade80', '#38bdf8', '#818cf8', '#f472b6'];
+
+export default function ProjectFormModal({ project, owners, onClose, onSave, onDelete }) {
   const [name, setName] = useState(project?.name || '');
   const [description, setDescription] = useState(project?.description || '');
   const [status, setStatus] = useState(project?.status || 'active');
+  const [priority, setPriority] = useState(project?.priority || 'medium');
   const [color, setColor] = useState(project?.color || '#c4b5fd');
+  const [ownerId, setOwnerId] = useState(project?.ownerId || '');
+  const [deadline, setDeadline] = useState(project?.deadline || '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
@@ -25,7 +36,15 @@ export default function ProjectFormModal({ project, onClose, onSave, onDelete })
     setSaving(true);
     setError(null);
     try {
-      await onSave({ name: name.trim(), description: description.trim() || null, status, color });
+      await onSave({
+        name: name.trim(),
+        description: description.trim() || null,
+        status,
+        priority,
+        color,
+        ownerId: ownerId || null,
+        deadline: deadline || null,
+      });
       onClose();
     } catch (err) {
       setError(err.message);
@@ -74,8 +93,56 @@ export default function ProjectFormModal({ project, onClose, onSave, onDelete })
           </select>
         </label>
         <label>
+          Priorität
+          <div className="priority-btn-group">
+            {PRIORITIES.map((p) => (
+              <button
+                key={p.value}
+                type="button"
+                className={`priority-btn priority-btn-${p.value} ${priority === p.value ? 'priority-btn-active' : ''}`}
+                onClick={() => setPriority(p.value)}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </label>
+        <label>
+          Deadline
+          <input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+        </label>
+        <label>
+          Projektleitung / Ansprechpartner
+          <select value={ownerId} onChange={(e) => setOwnerId(e.target.value)}>
+            <option value="">Keine Zuordnung</option>
+            {owners.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.username}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
           Farbe
-          <input type="color" value={color} onChange={(e) => setColor(e.target.value)} style={{ height: 40 }} />
+          <div className="project-color-presets">
+            {COLOR_PRESETS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                className={`project-color-swatch ${color === c ? 'project-color-swatch-active' : ''}`}
+                style={{ background: c }}
+                onClick={() => setColor(c)}
+                aria-label={`Farbe ${c}`}
+              />
+            ))}
+            <input
+              type="color"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+              className="project-color-custom"
+              title="Eigene Farbe"
+            />
+          </div>
         </label>
       </form>
     </Modal>
