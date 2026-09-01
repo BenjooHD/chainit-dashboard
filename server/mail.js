@@ -1,6 +1,14 @@
 const RESEND_API_URL = 'https://api.resend.com/emails';
 
+function escapeHtml(str) {
+  return String(str ?? '').replace(
+    /[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
+  );
+}
+
 async function sendVerificationEmail({ to, username, verifyUrl }) {
+  username = escapeHtml(username);
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM_EMAIL || 'ChainIt <onboarding@resend.dev>';
 
@@ -48,13 +56,14 @@ async function sendReminderEmail({ to, username, sections }) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM_EMAIL || 'ChainIt <onboarding@resend.dev>';
   const appUrl = process.env.APP_URL || '';
+  username = escapeHtml(username);
 
   const sectionHtml = sections
     .map(
       (s) => `
-        <h3 style="color:#c4b5fd;font-size:14px;margin:18px 0 6px;">${s.title}</h3>
+        <h3 style="color:#c4b5fd;font-size:14px;margin:18px 0 6px;">${escapeHtml(s.title)}</h3>
         <ul style="margin:0;padding-left:18px;color:#333;font-size:14px;">
-          ${s.items.map((item) => `<li style="margin-bottom:4px;">${item}</li>`).join('')}
+          ${s.items.map((item) => `<li style="margin-bottom:4px;">${escapeHtml(item)}</li>`).join('')}
         </ul>
       `
     )
