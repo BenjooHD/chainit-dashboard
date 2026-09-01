@@ -43,6 +43,8 @@ export default function DashboardPage() {
   const adminRef = useRef(null);
   const urgentRef = useRef(null);
   const [chatOpen, setChatOpen] = useState(false);
+  const [showMail, setShowMail] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
 
   const canCalendar = can('calendar', 'view');
   const canTasks = can('tasks', 'view');
@@ -78,6 +80,18 @@ export default function DashboardPage() {
     : [];
 
   const scrollToUrgent = () => urgentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const toggleMail = () =>
+    setShowMail((open) => {
+      const next = !open;
+      if (next) requestAnimationFrame(() => mailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      return next;
+    });
+  const toggleAdmin = () =>
+    setShowAdmin((open) => {
+      const next = !open;
+      if (next) requestAnimationFrame(() => adminRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      return next;
+    });
   const handleCalendarChange = () => {
     refreshStats();
     refreshUpcomingEvents();
@@ -109,9 +123,9 @@ export default function DashboardPage() {
             { key: 'tasks', label: 'Aufgaben', ref: tasksRef, show: canTasks },
             { key: 'contacts', label: 'Kontakte', ref: contactsRef, show: canContacts },
             { key: 'projects', label: 'Projekte', ref: projectsRef, show: canProjects },
-            { key: 'mail', label: 'Mail', ref: mailRef, show: canMail },
+            { key: 'mail', label: 'Mail', onClick: toggleMail, active: showMail, show: canMail },
             { key: 'agenda', label: 'Besprechung', ref: agendaRef, show: canAgenda },
-            { key: 'admin', label: 'Team verwalten', ref: adminRef, show: !!user?.isAdmin },
+            { key: 'admin', label: 'Team verwalten', onClick: toggleAdmin, active: showAdmin, show: !!user?.isAdmin },
             { key: 'chat', label: 'Chat', onClick: () => setChatOpen(true), show: true },
           ]}
         />
@@ -150,7 +164,7 @@ export default function DashboardPage() {
                 <ProjectsPanel readOnly={!can('projects', 'edit')} />
               </div>
             )}
-            {canMail && (
+            {canMail && showMail && (
               <div ref={mailRef}>
                 <MailPanel
                   messages={mailMessages}
@@ -171,7 +185,7 @@ export default function DashboardPage() {
           <PendingApproval />
         )}
 
-        {user?.isAdmin && (
+        {user?.isAdmin && showAdmin && (
           <div ref={adminRef}>
             <AdminPanel />
           </div>

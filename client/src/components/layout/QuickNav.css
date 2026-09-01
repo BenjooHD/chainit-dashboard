@@ -25,3 +25,12 @@
   border-color: var(--color-accent);
   color: var(--color-accent);
 }
+
+.quick-nav-item-active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #201a33;
+}
+.quick-nav-item-active:hover {
+  color: #201a33;
+}
