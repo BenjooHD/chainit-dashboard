@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from '../api/client';
+import { useToast } from '../components/common/ToastProvider';
 
 export function useInvoices() {
+  const showToast = useToast();
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,34 +29,38 @@ export function useInvoices() {
     async (payload) => {
       const created = await apiPost('/invoices', payload);
       await refresh();
+      showToast(`Rechnung ${created.invoiceNumber} erstellt`, 'success');
       return created;
     },
-    [refresh]
+    [refresh, showToast]
   );
 
   const update = useCallback(
     async (id, payload) => {
       const updated = await apiPut(`/invoices/${id}`, payload);
       await refresh();
+      showToast('Rechnung aktualisiert', 'success');
       return updated;
     },
-    [refresh]
+    [refresh, showToast]
   );
 
   const setStatus = useCallback(
     async (id, status) => {
       await apiPatch(`/invoices/${id}/status`, { status });
       await refresh();
+      showToast('Status aktualisiert', 'success');
     },
-    [refresh]
+    [refresh, showToast]
   );
 
   const remove = useCallback(
     async (id) => {
       await apiDelete(`/invoices/${id}`);
       await refresh();
+      showToast('Rechnung gelöscht', 'success');
     },
-    [refresh]
+    [refresh, showToast]
   );
 
   return { invoices, loading, error, refresh, create, update, setStatus, remove };
@@ -78,6 +84,7 @@ export function useInvoice(id) {
 }
 
 export function useInvoiceSettings() {
+  const showToast = useToast();
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -103,9 +110,10 @@ export function useInvoiceSettings() {
     async (payload) => {
       const updated = await apiPatch('/invoices/settings', payload);
       setSettings(updated);
+      showToast('Einstellungen gespeichert', 'success');
       return updated;
     },
-    []
+    [showToast]
   );
 
   return { settings, loading, error, refresh, update };

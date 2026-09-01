@@ -1,3 +1,4 @@
+import { formatDateDE } from '../../utils/formatDate';
 import './Tasks.css';
 
 const STATUS_OPTIONS = [
@@ -21,7 +22,7 @@ export default function TaskCard({ task, onStatusChange, onEdit, readOnly = fals
           {task.assigneeUsername}
         </div>
       )}
-      {task.dueDate && <div className="task-due">Fällig: {task.dueDate}</div>}
+      {task.dueDate && <div className="task-due">Fällig: {formatDateDE(task.dueDate)}</div>}
       {readOnly ? (
         <div className="task-status-readonly">
           {STATUS_OPTIONS.find((o) => o.value === task.status)?.label}

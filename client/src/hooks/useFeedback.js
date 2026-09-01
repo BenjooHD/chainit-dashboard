@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { apiDelete, apiGet, apiPost } from '../api/client';
+import { useToast } from '../components/common/ToastProvider';
 
 export function useFeedback() {
+  const showToast = useToast();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,17 +29,19 @@ export function useFeedback() {
     async (payload) => {
       const created = await apiPost('/feedback', payload);
       await refresh();
+      showToast('Feedback gepostet', 'success');
       return created;
     },
-    [refresh]
+    [refresh, showToast]
   );
 
   const remove = useCallback(
     async (id) => {
       await apiDelete(`/feedback/${id}`);
       await refresh();
+      showToast('Beitrag gelöscht', 'success');
     },
-    [refresh]
+    [refresh, showToast]
   );
 
   return { posts, loading, error, refresh, create, remove };

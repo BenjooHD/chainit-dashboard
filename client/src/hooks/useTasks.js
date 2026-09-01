@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { apiDelete, apiGet, apiPatch, apiPost } from '../api/client';
+import { useToast } from '../components/common/ToastProvider';
 
 export function useTasks(onChange) {
+  const showToast = useToast();
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
   const [assignees, setAssignees] = useState([]);
@@ -36,9 +38,10 @@ export function useTasks(onChange) {
       const created = await apiPost('/tasks', payload);
       await refresh();
       onChange?.();
+      showToast('Aufgabe erstellt', 'success');
       return created;
     },
-    [refresh, onChange]
+    [refresh, onChange, showToast]
   );
 
   const update = useCallback(
@@ -46,9 +49,10 @@ export function useTasks(onChange) {
       const updated = await apiPatch(`/tasks/${id}`, payload);
       await refresh();
       onChange?.();
+      showToast('Aufgabe aktualisiert', 'success');
       return updated;
     },
-    [refresh, onChange]
+    [refresh, onChange, showToast]
   );
 
   const remove = useCallback(
@@ -56,8 +60,9 @@ export function useTasks(onChange) {
       await apiDelete(`/tasks/${id}`);
       await refresh();
       onChange?.();
+      showToast('Aufgabe gelöscht', 'success');
     },
-    [refresh, onChange]
+    [refresh, onChange, showToast]
   );
 
   const createProject = useCallback(

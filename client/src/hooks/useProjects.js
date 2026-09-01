@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { apiDelete, apiGet, apiPatch, apiPost } from '../api/client';
+import { useToast } from '../components/common/ToastProvider';
 
 export function useProjects() {
+  const showToast = useToast();
   const [projects, setProjects] = useState([]);
   const [owners, setOwners] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,26 +31,29 @@ export function useProjects() {
     async (payload) => {
       const created = await apiPost('/projects', payload);
       await refresh();
+      showToast('Projekt erstellt', 'success');
       return created;
     },
-    [refresh]
+    [refresh, showToast]
   );
 
   const update = useCallback(
     async (id, payload) => {
       const updated = await apiPatch(`/projects/${id}`, payload);
       await refresh();
+      showToast('Projekt aktualisiert', 'success');
       return updated;
     },
-    [refresh]
+    [refresh, showToast]
   );
 
   const remove = useCallback(
     async (id) => {
       await apiDelete(`/projects/${id}`);
       await refresh();
+      showToast('Projekt gelöscht', 'success');
     },
-    [refresh]
+    [refresh, showToast]
   );
 
   return { projects, owners, loading, error, refresh, create, update, remove };

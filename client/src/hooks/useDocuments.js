@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { apiDelete, apiGet, apiPost, apiUpload } from '../api/client';
+import { useToast } from '../components/common/ToastProvider';
 
 export function useDocuments(projectId) {
+  const showToast = useToast();
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -33,18 +35,20 @@ export function useDocuments(projectId) {
       if (forProjectId) formData.append('projectId', forProjectId);
       const created = await apiUpload('/documents', formData);
       await refresh();
+      showToast('Datei hochgeladen', 'success');
       return created;
     },
-    [refresh]
+    [refresh, showToast]
   );
 
   const addLink = useCallback(
     async ({ title, url, projectId: forProjectId }) => {
       const created = await apiPost('/documents/link', { title, url, projectId: forProjectId || null });
       await refresh();
+      showToast('Link hinzugefügt', 'success');
       return created;
     },
-    [refresh]
+    [refresh, showToast]
   );
 
   const remove = useCallback(
@@ -55,8 +59,9 @@ export function useDocuments(projectId) {
         await apiDelete(`/documents/${doc.id}`);
       }
       await refresh();
+      showToast('Unterlage entfernt', 'success');
     },
-    [refresh]
+    [refresh, showToast]
   );
 
   return { documents, loading, error, refresh, upload, addLink, remove };

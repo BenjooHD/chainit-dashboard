@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { apiDelete, apiGet, apiPatch, apiPost } from '../api/client';
+import { useToast } from '../components/common/ToastProvider';
 
 export function useAgenda() {
+  const showToast = useToast();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,9 +29,10 @@ export function useAgenda() {
     async (payload) => {
       const created = await apiPost('/agenda', payload);
       await refresh();
+      showToast('Punkt hinzugefügt', 'success');
       return created;
     },
-    [refresh]
+    [refresh, showToast]
   );
 
   const update = useCallback(
@@ -45,8 +48,9 @@ export function useAgenda() {
     async (id) => {
       await apiDelete(`/agenda/${id}`);
       await refresh();
+      showToast('Punkt gelöscht', 'success');
     },
-    [refresh]
+    [refresh, showToast]
   );
 
   return { items, loading, error, refresh, create, update, remove };
