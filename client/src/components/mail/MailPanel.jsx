@@ -34,9 +34,16 @@ function MailDetailModal({ uid, onClose }) {
   );
 }
 
+function truncate(text, max = 60) {
+  if (!text) return text;
+  return text.length > max ? `${text.slice(0, max - 1)}…` : text;
+}
+
 export default function MailPanel() {
   const { messages, loading, error, notConfigured, refresh } = useMailList();
   const [openUid, setOpenUid] = useState(null);
+
+  const latestThree = messages.slice(0, 3);
 
   return (
     <section className="panel">
@@ -56,6 +63,22 @@ export default function MailPanel() {
       {loading && <div className="task-empty">Lädt…</div>}
       {!loading && !notConfigured && !error && messages.length === 0 && (
         <div className="task-empty">Keine Nachrichten</div>
+      )}
+
+      {!loading && latestThree.length > 0 && (
+        <div className="mail-latest">
+          {latestThree.map((m) => (
+            <div
+              key={m.uid}
+              className={`mail-latest-card ${m.seen ? '' : 'mail-latest-card-unseen'}`}
+              onClick={() => setOpenUid(m.uid)}
+            >
+              <div className="mail-latest-from">{truncate(m.from, 28)}</div>
+              <div className="mail-latest-subject">{truncate(m.subject, 50)}</div>
+              <div className="mail-latest-date">{formatDate(m.date)}</div>
+            </div>
+          ))}
+        </div>
       )}
 
       {!loading && messages.length > 0 && (
