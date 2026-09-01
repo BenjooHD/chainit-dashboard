@@ -74,6 +74,20 @@ CREATE TABLE IF NOT EXISTS documents (
 
 CREATE INDEX IF NOT EXISTS idx_documents_project ON documents(project_id);
 
+-- Google Drive (or any external) links shared alongside uploaded files.
+-- Kept in a separate table instead of widening `documents` so the existing
+-- NOT NULL file columns there never need relaxing for a production DB.
+CREATE TABLE IF NOT EXISTS document_links (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER REFERENCES projects(id) ON DELETE SET NULL,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title      TEXT NOT NULL,
+  url        TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_document_links_project ON document_links(project_id);
+
 CREATE TABLE IF NOT EXISTS tasks (
   id           INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

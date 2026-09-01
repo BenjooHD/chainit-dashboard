@@ -26,6 +26,7 @@ const upload = multer({ storage, limits: { fileSize: MAX_FILE_BYTES } });
 function serializeDocument(row) {
   return {
     id: row.id,
+    kind: 'file',
     projectId: row.project_id,
     title: row.title,
     description: row.description,
@@ -36,17 +37,51 @@ function serializeDocument(row) {
   };
 }
 
+function serializeLink(row) {
+  return {
+    id: row.id,
+    kind: 'link',
+    projectId: row.project_id,
+    title: row.title,
+    url: row.url,
+    createdAt: row.created_at,
+  };
+}
+
+function scopedRows(table, projectId) {
+  if (projectId === 'none') {
+    return db.prepare(`SELECT * FROM ${table} WHERE project_id IS NULL ORDER BY created_at DESC`).all();
+  } else if (projectId) {
+    return db.prepare(`SELECT * FROM ${table} WHERE project_id = ? ORDER BY created_at DESC`).all(projectId);
+  }
+  return db.prepare(`SELECT * FROM ${table} ORDER BY created_at DESC`).all();
+}
+
 router.get('/', canView, (req, res) => {
   const { projectId } = req.query;
-  let rows;
-  if (projectId === 'none') {
-    rows = db.prepare('SELECT * FROM documents WHERE project_id IS NULL ORDER BY created_at DESC').all();
-  } else if (projectId) {
-    rows = db.prepare('SELECT * FROM documents WHERE project_id = ? ORDER BY created_at DESC').all(projectId);
-  } else {
-    rows = db.prepare('SELECT * FROM documents ORDER BY created_at DESC').all();
-  }
-  res.json(rows.map(serializeDocument));
+  const files = scopedRows('documents', projectId).map(serializeDocument);
+  const links = scopedRows('document_links', projectId).map(serializeLink);
+  const combined = [...files, ...links].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  res.json(combined);
+});
+
+router.post('/link', canEdit, (req, res) => {
+  const { title, url, projectId } = req.body || {};
+  if (!title || !String(title).trim()) return res.status(400).json({ error: 'title is required' });
+  if (!url || !/^https?:\/\//i.test(url)) return res.status(400).json({ error: 'a valid http(s) url is required' });
+
+  const result = db
+    .prepare('INSERT INTO document_links (project_id, user_id, title, url) VALUES (?, ?, ?, ?)')
+    .run(projectId || null, req.session.userId, String(title).trim(), url.trim());
+
+  const row = db.prepare('SELECT * FROM document_links WHERE id = ?').get(result.lastInsertRowid);
+  res.status(201).json(serializeLink(row));
+});
+
+router.delete('/link/:id', canEdit, (req, res) => {
+  const result = db.prepare('DELETE FROM document_links WHERE id = ?').run(req.params.id);
+  if (result.changes === 0) return res.status(404).json({ error: 'Link not found' });
+  res.json({ ok: true });
 });
 
 router.post('/', canEdit, (req, res) => {

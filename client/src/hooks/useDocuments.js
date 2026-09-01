@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { apiDelete, apiGet, apiUpload } from '../api/client';
+import { apiDelete, apiGet, apiPost, apiUpload } from '../api/client';
 
 export function useDocuments(projectId) {
   const [documents, setDocuments] = useState([]);
@@ -38,13 +38,26 @@ export function useDocuments(projectId) {
     [refresh]
   );
 
+  const addLink = useCallback(
+    async ({ title, url, projectId: forProjectId }) => {
+      const created = await apiPost('/documents/link', { title, url, projectId: forProjectId || null });
+      await refresh();
+      return created;
+    },
+    [refresh]
+  );
+
   const remove = useCallback(
-    async (id) => {
-      await apiDelete(`/documents/${id}`);
+    async (doc) => {
+      if (doc.kind === 'link') {
+        await apiDelete(`/documents/link/${doc.id}`);
+      } else {
+        await apiDelete(`/documents/${doc.id}`);
+      }
       await refresh();
     },
     [refresh]
   );
 
-  return { documents, loading, error, refresh, upload, remove };
+  return { documents, loading, error, refresh, upload, addLink, remove };
 }

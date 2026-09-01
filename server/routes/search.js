@@ -41,10 +41,15 @@ router.get('/', (req, res) => {
       .prepare('SELECT id, name, status FROM projects WHERE name LIKE ? OR description LIKE ? LIMIT 8')
       .all(like, like)
       .map((r) => ({ id: r.id, title: r.name, status: r.status }));
-    result.documents = db
+    const files = db
       .prepare('SELECT id, title, project_id FROM documents WHERE title LIKE ? LIMIT 8')
       .all(like)
       .map((r) => ({ id: r.id, title: r.title, projectId: r.project_id }));
+    const links = db
+      .prepare('SELECT id, title, project_id FROM document_links WHERE title LIKE ? LIMIT 8')
+      .all(like)
+      .map((r) => ({ id: r.id, title: r.title, projectId: r.project_id, subtitle: 'Google Drive' }));
+    result.documents = [...files, ...links];
   }
   if (perms.agenda) {
     result.agenda = db
