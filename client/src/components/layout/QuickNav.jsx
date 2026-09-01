@@ -23,6 +23,13 @@ export default function QuickNav({ sections }) {
           {s.label}
         </button>
       ))}
+      <button
+        className="quick-nav-top"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        title="Nach oben"
+      >
+        ↑
+      </button>
     </nav>
   );
 }

@@ -34,17 +34,8 @@ export default function DashboardPage() {
   const tasksHook = useTasks(refreshStats);
   const contactsHook = useContacts(refreshStats);
 
-  const calendarRef = useRef(null);
-  const tasksRef = useRef(null);
-  const contactsRef = useRef(null);
-  const projectsRef = useRef(null);
-  const mailRef = useRef(null);
-  const agendaRef = useRef(null);
-  const adminRef = useRef(null);
   const urgentRef = useRef(null);
   const [chatOpen, setChatOpen] = useState(false);
-  const [showMail, setShowMail] = useState(false);
-  const [showAdmin, setShowAdmin] = useState(false);
 
   const canCalendar = can('calendar', 'view');
   const canTasks = can('tasks', 'view');
@@ -52,6 +43,21 @@ export default function DashboardPage() {
   const canProjects = can('projects', 'view');
   const canMail = can('mail', 'view');
   const canAgenda = can('agenda', 'view');
+  const canAdmin = !!user?.isAdmin;
+
+  const sectionDefs = [
+    { key: 'calendar', label: 'Kalender', show: canCalendar },
+    { key: 'tasks', label: 'Aufgaben', show: canTasks },
+    { key: 'contacts', label: 'Kontakte', show: canContacts },
+    { key: 'projects', label: 'Projekte', show: canProjects },
+    { key: 'mail', label: 'Mail', show: canMail },
+    { key: 'agenda', label: 'Besprechung', show: canAgenda },
+    { key: 'admin', label: 'Team verwalten', show: canAdmin },
+  ];
+
+  const [activeSection, setActiveSection] = useState(
+    () => sectionDefs.find((s) => s.show)?.key || null
+  );
 
   const { events: upcomingEvents, loading: eventsLoading, refresh: refreshUpcomingEvents } = useUpcomingEvents(
     UPCOMING_DAYS,
@@ -64,6 +70,7 @@ export default function DashboardPage() {
     error: mailError,
     refresh: refreshMail,
     markAllRead: markAllMailRead,
+    toggleFlag: toggleMailFlag,
   } = useMailList(canMail);
   const importantEvents = upcomingEvents.filter((e) => e.priority === 'high');
 
@@ -81,18 +88,6 @@ export default function DashboardPage() {
     : [];
 
   const scrollToUrgent = () => urgentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  const toggleMail = () =>
-    setShowMail((open) => {
-      const next = !open;
-      if (next) requestAnimationFrame(() => mailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
-      return next;
-    });
-  const toggleAdmin = () =>
-    setShowAdmin((open) => {
-      const next = !open;
-      if (next) requestAnimationFrame(() => adminRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
-      return next;
-    });
   const handleCalendarChange = () => {
     refreshStats();
     refreshUpcomingEvents();
@@ -120,13 +115,11 @@ export default function DashboardPage() {
       {hasAnyAccess && (
         <QuickNav
           sections={[
-            { key: 'calendar', label: 'Kalender', ref: calendarRef, show: canCalendar },
-            { key: 'tasks', label: 'Aufgaben', ref: tasksRef, show: canTasks },
-            { key: 'contacts', label: 'Kontakte', ref: contactsRef, show: canContacts },
-            { key: 'projects', label: 'Projekte', ref: projectsRef, show: canProjects },
-            { key: 'mail', label: 'Mail', onClick: toggleMail, active: showMail, show: canMail },
-            { key: 'agenda', label: 'Besprechung', ref: agendaRef, show: canAgenda },
-            { key: 'admin', label: 'Team verwalten', onClick: toggleAdmin, active: showAdmin, show: !!user?.isAdmin },
+            ...sectionDefs.map((s) => ({
+              ...s,
+              onClick: () => setActiveSection(s.key),
+              active: activeSection === s.key,
+            })),
             { key: 'chat', label: 'Chat', onClick: () => setChatOpen(true), show: true },
           ]}
         />
@@ -145,52 +138,34 @@ export default function DashboardPage() {
               />
             </div>
             <KpiRow stats={stats} loading={statsLoading} />
-            {canCalendar && (
-              <div ref={calendarRef}>
-                <CalendarMonthView onChange={handleCalendarChange} readOnly={!can('calendar', 'edit')} />
-              </div>
+            {canCalendar && activeSection === 'calendar' && (
+              <CalendarMonthView onChange={handleCalendarChange} readOnly={!can('calendar', 'edit')} />
             )}
-            {canTasks && (
-              <div ref={tasksRef}>
-                <TaskBoard tasksHook={tasksHook} readOnly={!can('tasks', 'edit')} />
-              </div>
+            {canTasks && activeSection === 'tasks' && (
+              <TaskBoard tasksHook={tasksHook} readOnly={!can('tasks', 'edit')} />
             )}
-            {canContacts && (
-              <div ref={contactsRef}>
-                <ContactsTable contactsHook={contactsHook} readOnly={!can('contacts', 'edit')} />
-              </div>
+            {canContacts && activeSection === 'contacts' && (
+              <ContactsTable contactsHook={contactsHook} readOnly={!can('contacts', 'edit')} />
             )}
-            {canProjects && (
-              <div ref={projectsRef}>
-                <ProjectsPanel readOnly={!can('projects', 'edit')} />
-              </div>
+            {canProjects && activeSection === 'projects' && (
+              <ProjectsPanel readOnly={!can('projects', 'edit')} />
             )}
-            {canMail && showMail && (
-              <div ref={mailRef}>
-                <MailPanel
-                  messages={mailMessages}
-                  loading={mailLoading}
-                  error={mailError}
-                  notConfigured={mailNotConfigured}
-                  refresh={refreshMail}
-                  markAllRead={markAllMailRead}
-                />
-              </div>
+            {canMail && activeSection === 'mail' && (
+              <MailPanel
+                messages={mailMessages}
+                loading={mailLoading}
+                error={mailError}
+                notConfigured={mailNotConfigured}
+                refresh={refreshMail}
+                markAllRead={markAllMailRead}
+                toggleFlag={toggleMailFlag}
+              />
             )}
-            {canAgenda && (
-              <div ref={agendaRef}>
-                <AgendaPanel readOnly={!can('agenda', 'edit')} />
-              </div>
-            )}
+            {canAgenda && activeSection === 'agenda' && <AgendaPanel readOnly={!can('agenda', 'edit')} />}
+            {canAdmin && activeSection === 'admin' && <AdminPanel />}
           </>
         ) : (
           <PendingApproval />
-        )}
-
-        {user?.isAdmin && showAdmin && (
-          <div ref={adminRef}>
-            <AdminPanel />
-          </div>
         )}
       </div>
 
