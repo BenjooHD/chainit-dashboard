@@ -18,7 +18,7 @@ export default function MailBell({ messages, notConfigured }) {
   const containerRef = useRef(null);
   useClickOutside(containerRef, () => setOpen(false), open);
 
-  const rest = messages.slice(3);
+  const rest = messages;
   const unreadRest = rest.filter((m) => !m.seen).length;
 
   return (

@@ -48,6 +48,16 @@ export function useMailList(enabled = true) {
   return { messages, loading, error, notConfigured, refresh, markAllRead, toggleFlag };
 }
 
+// Splits the already-priority-sorted message list into the "important or unread"
+// slice shown up top (header strip) and everything else (mail icon dropdown),
+// so a read/non-flagged mail never silently vanishes from both compact views.
+export function splitMailByPriority(messages, limit = 3) {
+  const top = messages.filter((m) => !m.seen || m.flagged).slice(0, limit);
+  const topUids = new Set(top.map((m) => m.uid));
+  const rest = messages.filter((m) => !topUids.has(m.uid));
+  return { top, rest };
+}
+
 export function useMailMessage(uid) {
   const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(false);

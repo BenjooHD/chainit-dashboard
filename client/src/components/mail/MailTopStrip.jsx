@@ -16,13 +16,11 @@ export default function MailTopStrip({ messages, loading, notConfigured, error }
   const [openUid, setOpenUid] = useState(null);
 
   if (loading || notConfigured || error) return null;
-
-  const topThree = messages.slice(0, 3);
-  if (topThree.length === 0) return null;
+  if (messages.length === 0) return null;
 
   return (
     <div className="mail-top-strip">
-      {topThree.map((m) => (
+      {messages.map((m) => (
         <button
           key={m.uid}
           className={`mail-top-card ${m.seen ? '' : 'mail-top-card-unseen'}`}

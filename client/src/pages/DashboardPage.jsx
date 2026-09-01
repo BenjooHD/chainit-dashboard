@@ -18,7 +18,7 @@ import { useStats } from '../hooks/useStats';
 import { useTasks } from '../hooks/useTasks';
 import { useContacts } from '../hooks/useContacts';
 import { useUpcomingEvents } from '../hooks/useUpcomingEvents';
-import { useMailList } from '../hooks/useMail';
+import { useMailList, splitMailByPriority } from '../hooks/useMail';
 import './Dashboard.css';
 
 const UPCOMING_DAYS = 5;
@@ -55,9 +55,10 @@ export default function DashboardPage() {
     { key: 'admin', label: 'Team verwalten', show: canAdmin },
   ];
 
-  const [activeSection, setActiveSection] = useState(
-    () => sectionDefs.find((s) => s.show)?.key || null
-  );
+  // null = home overview (KPI/Aktuelles + the everyday sections stacked below).
+  // Mail and Team verwalten are deliberately left out of the overview and only
+  // appear once their nav button is clicked.
+  const [activeSection, setActiveSection] = useState(null);
 
   const { events: upcomingEvents, loading: eventsLoading, refresh: refreshUpcomingEvents } = useUpcomingEvents(
     UPCOMING_DAYS,
@@ -73,6 +74,7 @@ export default function DashboardPage() {
     toggleFlag: toggleMailFlag,
   } = useMailList(canMail);
   const importantEvents = upcomingEvents.filter((e) => e.priority === 'high');
+  const { top: mailTopMessages, rest: mailRestMessages } = splitMailByPriority(mailMessages);
 
   const todayStr = dateKey(new Date());
   const in5DaysStr = dateKey(new Date(Date.now() + UPCOMING_DAYS * 24 * 60 * 60 * 1000));
@@ -87,7 +89,10 @@ export default function DashboardPage() {
         .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
     : [];
 
-  const scrollToUrgent = () => urgentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const scrollToUrgent = () => {
+    setActiveSection(null);
+    requestAnimationFrame(() => urgentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  };
   const handleCalendarChange = () => {
     refreshStats();
     refreshUpcomingEvents();
@@ -101,12 +106,12 @@ export default function DashboardPage() {
         upcomingTasks={upcomingTasks}
         onJumpToUrgent={scrollToUrgent}
         canMail={canMail}
-        mailMessages={mailMessages}
+        mailMessages={mailRestMessages}
         mailNotConfigured={mailNotConfigured}
       />
       {canMail && (
         <MailTopStrip
-          messages={mailMessages}
+          messages={mailTopMessages}
           loading={mailLoading}
           notConfigured={mailNotConfigured}
           error={mailError}
@@ -117,7 +122,7 @@ export default function DashboardPage() {
           sections={[
             ...sectionDefs.map((s) => ({
               ...s,
-              onClick: () => setActiveSection(s.key),
+              onClick: () => setActiveSection((cur) => (cur === s.key ? null : s.key)),
               active: activeSection === s.key,
             })),
             { key: 'chat', label: 'Chat', onClick: () => setChatOpen(true), show: true },
@@ -126,44 +131,52 @@ export default function DashboardPage() {
       )}
       <div className="dashboard-layout">
         {hasAnyAccess ? (
-          <>
-            <div ref={urgentRef}>
-              <UrgentPanel
-                overdueTasks={overdueTasks}
-                upcomingTasks={upcomingTasks}
-                importantEvents={importantEvents}
-                loading={eventsLoading}
-                showTasks={canTasks}
-                showCalendar={canCalendar}
-              />
-            </div>
-            <KpiRow stats={stats} loading={statsLoading} />
-            {canCalendar && activeSection === 'calendar' && (
-              <CalendarMonthView onChange={handleCalendarChange} readOnly={!can('calendar', 'edit')} />
-            )}
-            {canTasks && activeSection === 'tasks' && (
-              <TaskBoard tasksHook={tasksHook} readOnly={!can('tasks', 'edit')} />
-            )}
-            {canContacts && activeSection === 'contacts' && (
-              <ContactsTable contactsHook={contactsHook} readOnly={!can('contacts', 'edit')} />
-            )}
-            {canProjects && activeSection === 'projects' && (
-              <ProjectsPanel readOnly={!can('projects', 'edit')} />
-            )}
-            {canMail && activeSection === 'mail' && (
-              <MailPanel
-                messages={mailMessages}
-                loading={mailLoading}
-                error={mailError}
-                notConfigured={mailNotConfigured}
-                refresh={refreshMail}
-                markAllRead={markAllMailRead}
-                toggleFlag={toggleMailFlag}
-              />
-            )}
-            {canAgenda && activeSection === 'agenda' && <AgendaPanel readOnly={!can('agenda', 'edit')} />}
-            {canAdmin && activeSection === 'admin' && <AdminPanel />}
-          </>
+          activeSection === null ? (
+            <>
+              <div ref={urgentRef}>
+                <UrgentPanel
+                  overdueTasks={overdueTasks}
+                  upcomingTasks={upcomingTasks}
+                  importantEvents={importantEvents}
+                  loading={eventsLoading}
+                  showTasks={canTasks}
+                  showCalendar={canCalendar}
+                />
+              </div>
+              <KpiRow stats={stats} loading={statsLoading} />
+              {canCalendar && <CalendarMonthView onChange={handleCalendarChange} readOnly={!can('calendar', 'edit')} />}
+              {canTasks && <TaskBoard tasksHook={tasksHook} readOnly={!can('tasks', 'edit')} />}
+              {canContacts && <ContactsTable contactsHook={contactsHook} readOnly={!can('contacts', 'edit')} />}
+              {canProjects && <ProjectsPanel readOnly={!can('projects', 'edit')} />}
+              {canAgenda && <AgendaPanel readOnly={!can('agenda', 'edit')} />}
+            </>
+          ) : (
+            <>
+              {activeSection === 'calendar' && canCalendar && (
+                <CalendarMonthView onChange={handleCalendarChange} readOnly={!can('calendar', 'edit')} />
+              )}
+              {activeSection === 'tasks' && canTasks && (
+                <TaskBoard tasksHook={tasksHook} readOnly={!can('tasks', 'edit')} />
+              )}
+              {activeSection === 'contacts' && canContacts && (
+                <ContactsTable contactsHook={contactsHook} readOnly={!can('contacts', 'edit')} />
+              )}
+              {activeSection === 'projects' && canProjects && <ProjectsPanel readOnly={!can('projects', 'edit')} />}
+              {activeSection === 'mail' && canMail && (
+                <MailPanel
+                  messages={mailMessages}
+                  loading={mailLoading}
+                  error={mailError}
+                  notConfigured={mailNotConfigured}
+                  refresh={refreshMail}
+                  markAllRead={markAllMailRead}
+                  toggleFlag={toggleMailFlag}
+                />
+              )}
+              {activeSection === 'agenda' && canAgenda && <AgendaPanel readOnly={!can('agenda', 'edit')} />}
+              {activeSection === 'admin' && canAdmin && <AdminPanel />}
+            </>
+          )
         ) : (
           <PendingApproval />
         )}
