@@ -66,9 +66,9 @@ export default function DashboardPage() {
     { key: 'admin', label: 'Team verwalten', show: canAdmin },
   ];
 
-  // null = home overview (KPI/Aktuelles + the everyday sections stacked below).
-  // Mail and Team verwalten are deliberately left out of the overview and only
-  // appear once their nav button is clicked.
+  // null = home overview (KPI/Aktuelles + Kalender/Aufgaben/Projekte stacked
+  // below). Every other section is deliberately click-only, to keep the
+  // home screen from growing unreadable as more areas get added.
   const [activeSection, setActiveSection] = useState(null);
 
   const { events: upcomingEvents, loading: eventsLoading, refresh: refreshUpcomingEvents } = useUpcomingEvents(
@@ -161,12 +161,7 @@ export default function DashboardPage() {
               <KpiRow stats={stats} loading={statsLoading} onSelectSection={setActiveSection} />
               {canCalendar && <CalendarMonthView onChange={handleCalendarChange} readOnly={!can('calendar', 'edit')} />}
               {canTasks && <TaskBoard tasksHook={tasksHook} readOnly={!can('tasks', 'edit')} />}
-              {canContacts && <ContactsTable contactsHook={contactsHook} readOnly={!can('contacts', 'edit')} />}
               {canProjects && <ProjectsPanel readOnly={!can('projects', 'edit')} />}
-              {canProjects && <GeneralDocumentsPanel readOnly={!can('projects', 'edit')} />}
-              {canCosts && <CostsPanel readOnly={!can('costs', 'edit')} />}
-              {canAgenda && <AgendaPanel readOnly={!can('agenda', 'edit')} />}
-              {canFeedback && <FeedbackPanel />}
             </>
           ) : (
             <>
