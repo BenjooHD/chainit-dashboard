@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { apiGet } from '../api/client';
+import { apiGet, apiPatch } from '../api/client';
 
 export function useMailList(enabled = true) {
   const [messages, setMessages] = useState([]);
@@ -26,7 +26,12 @@ export function useMailList(enabled = true) {
     if (enabled) refresh();
   }, [refresh, enabled]);
 
-  return { messages, loading, error, notConfigured, refresh };
+  const markAllRead = useCallback(async () => {
+    await apiPatch('/mail/mark-all-read');
+    setMessages((prev) => prev.map((m) => ({ ...m, seen: true })));
+  }, []);
+
+  return { messages, loading, error, notConfigured, refresh, markAllRead };
 }
 
 export function useMailMessage(uid) {

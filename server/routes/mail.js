@@ -46,6 +46,24 @@ router.get('/', canView, async (req, res) => {
   }
 });
 
+router.patch('/mark-all-read', canView, async (req, res) => {
+  if (!isConfigured()) {
+    return res.status(503).json({ error: 'Mail is not configured yet', code: 'MAIL_NOT_CONFIGURED' });
+  }
+  try {
+    await withMailbox(async (client) => {
+      const status = await client.status('INBOX', { messages: true });
+      if ((status.messages || 0) > 0) {
+        await client.messageFlagsAdd('1:*', ['\\Seen']);
+      }
+    });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('IMAP mark-all-read failed:', err);
+    res.status(502).json({ error: 'Could not reach the mailbox. Please try again shortly.' });
+  }
+});
+
 router.get('/:uid', canView, async (req, res) => {
   if (!isConfigured()) {
     return res.status(503).json({ error: 'Mail is not configured yet', code: 'MAIL_NOT_CONFIGURED' });

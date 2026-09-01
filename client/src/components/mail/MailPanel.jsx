@@ -7,16 +7,35 @@ function formatDate(iso) {
   return new Date(iso).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 }
 
-export default function MailPanel({ messages, loading, error, notConfigured, refresh }) {
+export default function MailPanel({ messages, loading, error, notConfigured, refresh, markAllRead }) {
   const [openUid, setOpenUid] = useState(null);
+  const [marking, setMarking] = useState(false);
+
+  const hasUnread = messages.some((m) => !m.seen);
+
+  const handleMarkAllRead = async () => {
+    setMarking(true);
+    try {
+      await markAllRead();
+    } finally {
+      setMarking(false);
+    }
+  };
 
   return (
     <section className="panel">
       <div className="panel-header">
         <h2>Mail — info@chainit-technologies.com</h2>
-        <button className="btn btn-secondary" onClick={refresh}>
-          Aktualisieren
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          {hasUnread && (
+            <button className="btn btn-secondary" onClick={handleMarkAllRead} disabled={marking}>
+              {marking ? 'Markiere…' : 'Alle als gelesen markieren'}
+            </button>
+          )}
+          <button className="btn btn-secondary" onClick={refresh}>
+            Aktualisieren
+          </button>
+        </div>
       </div>
 
       {notConfigured && (

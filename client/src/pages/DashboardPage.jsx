@@ -63,6 +63,7 @@ export default function DashboardPage() {
     notConfigured: mailNotConfigured,
     error: mailError,
     refresh: refreshMail,
+    markAllRead: markAllMailRead,
   } = useMailList(canMail);
   const importantEvents = upcomingEvents.filter((e) => e.priority === 'high');
 
@@ -172,6 +173,7 @@ export default function DashboardPage() {
                   error={mailError}
                   notConfigured={mailNotConfigured}
                   refresh={refreshMail}
+                  markAllRead={markAllMailRead}
                 />
               </div>
             )}
