@@ -21,6 +21,7 @@ import { useAuth } from '../context/AuthContext';
 import { useStats } from '../hooks/useStats';
 import { useTasks } from '../hooks/useTasks';
 import { useContacts } from '../hooks/useContacts';
+import { useProjects } from '../hooks/useProjects';
 import { useUpcomingEvents } from '../hooks/useUpcomingEvents';
 import { useMailList, splitMailByPriority } from '../hooks/useMail';
 import './Dashboard.css';
@@ -37,6 +38,7 @@ export default function DashboardPage() {
   const { stats, loading: statsLoading, refresh: refreshStats } = useStats();
   const tasksHook = useTasks(refreshStats);
   const contactsHook = useContacts(refreshStats);
+  const projectsHook = useProjects();
 
   const urgentRef = useRef(null);
   const [chatOpen, setChatOpen] = useState(false);
@@ -159,14 +161,26 @@ export default function DashboardPage() {
                 />
               </div>
               <KpiRow stats={stats} loading={statsLoading} onSelectSection={setActiveSection} />
-              {canCalendar && <CalendarMonthView onChange={handleCalendarChange} readOnly={!can('calendar', 'edit')} />}
+              {canCalendar && (
+                <CalendarMonthView
+                  onChange={handleCalendarChange}
+                  readOnly={!can('calendar', 'edit')}
+                  tasks={canTasks ? tasksHook.tasks : []}
+                  projects={canProjects ? projectsHook.projects : []}
+                />
+              )}
               {canTasks && <TaskBoard tasksHook={tasksHook} readOnly={!can('tasks', 'edit')} />}
-              {canProjects && <ProjectsPanel readOnly={!can('projects', 'edit')} />}
+              {canProjects && <ProjectsPanel projectsHook={projectsHook} readOnly={!can('projects', 'edit')} />}
             </>
           ) : (
             <>
               {activeSection === 'calendar' && canCalendar && (
-                <CalendarMonthView onChange={handleCalendarChange} readOnly={!can('calendar', 'edit')} />
+                <CalendarMonthView
+                  onChange={handleCalendarChange}
+                  readOnly={!can('calendar', 'edit')}
+                  tasks={canTasks ? tasksHook.tasks : []}
+                  projects={canProjects ? projectsHook.projects : []}
+                />
               )}
               {activeSection === 'tasks' && canTasks && (
                 <TaskBoard tasksHook={tasksHook} readOnly={!can('tasks', 'edit')} />
@@ -174,7 +188,9 @@ export default function DashboardPage() {
               {activeSection === 'contacts' && canContacts && (
                 <ContactsTable contactsHook={contactsHook} readOnly={!can('contacts', 'edit')} />
               )}
-              {activeSection === 'projects' && canProjects && <ProjectsPanel readOnly={!can('projects', 'edit')} />}
+              {activeSection === 'projects' && canProjects && (
+                <ProjectsPanel projectsHook={projectsHook} readOnly={!can('projects', 'edit')} />
+              )}
               {activeSection === 'documents' && canProjects && (
                 <GeneralDocumentsPanel readOnly={!can('projects', 'edit')} />
               )}

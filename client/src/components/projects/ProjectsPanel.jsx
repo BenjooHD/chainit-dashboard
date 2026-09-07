@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useProjects } from '../../hooks/useProjects';
 import Button from '../common/Button';
 import ConfirmDialog from '../common/ConfirmDialog';
 import ProjectFormModal from './ProjectFormModal';
@@ -21,8 +20,8 @@ function todayDateStr() {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-export default function ProjectsPanel({ readOnly = false }) {
-  const { projects, owners, loading, create, update, remove } = useProjects();
+export default function ProjectsPanel({ projectsHook, readOnly = false }) {
+  const { projects, owners, loading, create, update, remove } = projectsHook;
   const [showCreate, setShowCreate] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const [viewingProject, setViewingProject] = useState(null);

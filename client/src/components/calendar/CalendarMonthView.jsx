@@ -36,7 +36,7 @@ function dateKey(d) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-export default function CalendarMonthView({ onChange, readOnly = false }) {
+export default function CalendarMonthView({ onChange, readOnly = false, tasks = [], projects = [] }) {
   const [monthDate, setMonthDate] = useState(() => startOfMonth(new Date()));
   const { events, create, update, remove, removeSeries } = useEvents(monthDate, onChange);
   const [modalDate, setModalDate] = useState(null);
@@ -66,6 +66,26 @@ export default function CalendarMonthView({ onChange, readOnly = false }) {
     }
     return map;
   }, [events]);
+
+  const tasksByDay = useMemo(() => {
+    const map = {};
+    for (const t of tasks) {
+      if (!t.dueDate) continue;
+      if (!map[t.dueDate]) map[t.dueDate] = [];
+      map[t.dueDate].push(t);
+    }
+    return map;
+  }, [tasks]);
+
+  const projectsByDay = useMemo(() => {
+    const map = {};
+    for (const p of projects) {
+      if (!p.deadline) continue;
+      if (!map[p.deadline]) map[p.deadline] = [];
+      map[p.deadline].push(p);
+    }
+    return map;
+  }, [projects]);
 
   const monthLabel = monthDate.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
 
@@ -114,6 +134,8 @@ export default function CalendarMonthView({ onChange, readOnly = false }) {
             inMonth={d.getMonth() === monthDate.getMonth()}
             isToday={isSameDay(d, today)}
             events={eventsByDay[dateKey(d)] || []}
+            tasksDue={tasksByDay[dateKey(d)] || []}
+            projectsDue={projectsByDay[dateKey(d)] || []}
             onAdd={readOnly ? undefined : setModalDate}
             onSelectEvent={readOnly ? undefined : setEditingEvent}
             readOnly={readOnly}
