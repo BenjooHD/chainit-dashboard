@@ -139,6 +139,13 @@
   white-space: nowrap;
 }
 
+.cal-task-pill-unfinished {
+  border-left-color: var(--color-danger);
+  background: rgba(248, 113, 113, 0.14);
+  color: var(--color-danger);
+  font-weight: 700;
+}
+
 .cal-project-pill {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
@@ -151,6 +158,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.cal-project-pill-unfinished {
+  border-left-color: var(--color-danger);
+  background: rgba(248, 113, 113, 0.14);
+  color: var(--color-danger);
+  font-weight: 700;
 }
 
 .priority-btn-group {

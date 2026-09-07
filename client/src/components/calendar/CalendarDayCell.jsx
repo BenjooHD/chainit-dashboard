@@ -42,23 +42,33 @@ export default function CalendarDayCell({
         )}
         {events.length > 3 && <div className="cal-event-more">+{events.length - 3} mehr</div>}
 
-        {tasksDue.slice(0, 2).map((t) => (
-          <div key={`task-${t.id}`} className="cal-task-pill" title={`Aufgabe fällig: ${t.title}`}>
-            ✓ {t.title}
-          </div>
-        ))}
+        {tasksDue.slice(0, 2).map((t) => {
+          const unfinished = t.status !== 'done';
+          return (
+            <div
+              key={`task-${t.id}`}
+              className={`cal-task-pill ${unfinished ? 'cal-task-pill-unfinished' : ''}`}
+              title={`Aufgabe fällig: ${t.title}`}
+            >
+              {unfinished ? t.title : `✓ ${t.title}`}
+            </div>
+          );
+        })}
         {tasksDue.length > 2 && <div className="cal-event-more">+{tasksDue.length - 2} Aufgabe(n)</div>}
 
-        {projectsDue.slice(0, 2).map((p) => (
-          <div
-            key={`project-${p.id}`}
-            className="cal-project-pill"
-            style={{ borderLeftColor: p.color }}
-            title={`Projekt-Deadline: ${p.name}`}
-          >
-            📁 {p.name}
-          </div>
-        ))}
+        {projectsDue.slice(0, 2).map((p) => {
+          const unfinished = p.status !== 'done';
+          return (
+            <div
+              key={`project-${p.id}`}
+              className={`cal-project-pill ${unfinished ? 'cal-project-pill-unfinished' : ''}`}
+              style={unfinished ? undefined : { borderLeftColor: p.color }}
+              title={`Projekt-Deadline: ${p.name}`}
+            >
+              📁 {p.name}
+            </div>
+          );
+        })}
         {projectsDue.length > 2 && <div className="cal-event-more">+{projectsDue.length - 2} Projekt(e)</div>}
       </div>
     </div>
