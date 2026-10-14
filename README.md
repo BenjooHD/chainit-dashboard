@@ -1,88 +1,159 @@
 # ChainIt Dashboard
 
-Team-Dashboard mit eigenen Accounts (E-Mail-Verifizierung), Terminkalender,
-Aufgaben/Projekten, Kontakten und KPI-Kacheln.
+Professional task and project management platform for ChainIt Technologies. Built with Next.js, React, and Tailwind CSS.
 
-- **Backend:** Express + `node:sqlite` (keine native Kompilierung nötig)
-- **Frontend:** React + Vite
-- **Auth:** Benutzername + Passwort, E-Mail-Verifizierung via [Resend](https://resend.com)
+## Features
 
-## Lokal entwickeln
+### Dashboard
+- **Overview statistics** - Total tasks, open, in-progress, and completed counts
+- **Team workload distribution** - Visual breakdown of task allocation across Ben, Joona, and Noah
+- **Alerts** - Automatic highlighting of overdue tasks and high-priority items
+- **Recent tasks** - Quick view of latest activity
 
-```powershell
-npm install          # installiert Server + Client (npm workspaces)
-npm run dev           # startet API (:3001) und Vite (:5173) gemeinsam
+### Tasks
+- **Create and manage tasks** - Full CRUD operations with intuitive form
+- **Task assignment** - Assign tasks to Ben, Joona, Noah, or leave unassigned
+- **Priority levels** - Low, Medium, High priority classification
+- **Due dates** - Track deadlines with visual overdue indicators
+- **Task status** - Open, In Progress, Completed workflow
+- **Bucket/Category system** - Organize tasks by category (Development, Design, Marketing, Business)
+- **Task notes** - Add detailed notes and descriptions to tasks
+- **Status grouping** - View tasks organized by their current status
+- **Task details** - Click "Details" to view full notes and information
+- **Edit and delete** - Modify or remove tasks as needed
+- **Filtering** - Filter by assignee, status, or bucket category
+
+### Brainstorming
+- **Idea capture** - Add new ideas and strategies with descriptions
+- **Category organization** - Categorize ideas (Features, Improvements, Business, Marketing)
+- **Voting system** - Upvote ideas to prioritize discussions
+- **Author attribution** - Track who proposed each idea
+- **Category filtering** - View ideas by category or all at once
+- **Sorted by popularity** - Ideas automatically sorted by vote count
+
+## Getting Started
+
+### Installation
+
+```bash
+cd "/Users/noahdyck/Documents/ChainIt Dashboard"
+npm install
 ```
 
-Öffne dann `http://localhost:5173`. Ohne `RESEND_API_KEY` in `server/.env`
-wird der Verifizierungs-Link statt einer echten Mail nur in die
-Server-Konsole geloggt — praktisch zum lokalen Testen.
+### Development
 
-## Live schalten (Railway)
-
-Das Repo ist so vorbereitet, dass ein Host es als **einen** Service
-erkennt: `npm install` → `npm run build` (baut das Frontend) → `npm start`
-(ein Node-Prozess liefert API **und** Frontend aus derselben URL aus).
-
-### 1. GitHub-Repo anlegen und pushen
-
-Auf [github.com/new](https://github.com/new) ein neues, **leeres** Repository
-anlegen (kein README/gitignore ankreuzen, das haben wir schon lokal). Dann:
-
-```powershell
-cd C:\Users\Startklar\Desktop\ChainIt-Dashboard
-git remote add origin https://github.com/<dein-user>/<repo-name>.git
-git push -u origin master
+```bash
+npm run dev
 ```
 
-### 2. Bei Railway anmelden
+The application will be available at `http://localhost:3000`
 
-Auf [railway.com](https://railway.com) mit "Login with GitHub" registrieren
-— das gibt Railway direkt Zugriff, um später aus dem Repo zu deployen.
+### Building
 
-### 3. Projekt erstellen
-
-"New Project" → "Deploy from GitHub repo" → das gerade gepushte Repo
-auswählen. Railway erkennt automatisch, dass es sich um ein Node-Projekt
-handelt und nutzt die Scripts aus `package.json`.
-
-### 4. Persistentes Volume anlegen
-
-Im Service unter "Settings" → "Volumes" → "New Volume", Mount-Pfad: `/data`.
-Ohne das würde die SQLite-Datenbank bei jedem Neustart/Deploy verloren gehen.
-
-### 5. Umgebungsvariablen setzen
-
-Unter "Variables":
-
-| Variable | Wert |
-|---|---|
-| `NODE_ENV` | `production` |
-| `SESSION_SECRET` | ein langer Zufallsstring (siehe unten) |
-| `DB_PATH` | `/data/chainit.db` |
-| `APP_URL` | die von Railway vergebene URL, z.B. `https://chainit-dashboard-production.up.railway.app` (nach dem ersten Deploy sichtbar, dann hier eintragen) |
-| `RESEND_API_KEY` | dein Key von resend.com |
-| `RESEND_FROM_EMAIL` | `ChainIt <onboarding@resend.dev>` (siehe Hinweis unten) |
-
-Zufälligen `SESSION_SECRET` generieren:
-```powershell
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```bash
+npm run build
+npm start
 ```
 
-### 6. Deploy abwarten, URL öffnen
+## Project Structure
 
-Railway baut und startet automatisch. Die vergebene URL (unter "Settings" →
-"Networking" → "Generate Domain") ist der Link, den du im Team teilst.
+```
+src/
+├── app/
+│   ├── layout.tsx         # Root layout with global styles
+│   ├── page.tsx           # Home page component
+│   └── globals.css        # Tailwind CSS configuration
+├── components/
+│   ├── Dashboard.tsx      # Main dashboard container
+│   ├── Sidebar.tsx        # Navigation sidebar
+│   ├── TaskForm.tsx       # Task creation/editing form
+│   ├── TaskCard.tsx       # Individual task display component
+│   ├── TaskList.tsx       # Task grouping and display
+│   ├── TaskFilters.tsx    # Filter controls
+│   └── views/
+│       ├── DashboardView.tsx       # Dashboard statistics and overview
+│       ├── TasksView.tsx           # Tasks management interface
+│       └── BrainstormingView.tsx   # Brainstorming and idea tracking
+└── context/
+    └── TaskContext.tsx    # Global state management
+```
 
-> **Wichtig:** Ohne eigene verifizierte Domain in Resend kann der
-> Standard-Absender `onboarding@resend.dev` nur an die E-Mail-Adresse
-> deines eigenen Resend-Accounts senden. Für echte Registrierung durch
-> mehrere Teammitglieder: in Resend unter "Domains" eine eigene Domain
-> hinzufügen, die dort angezeigten DNS-Einträge beim Domain-Anbieter
-> eintragen (paar Minuten Arbeit + etwas Wartezeit für DNS), danach
-> `RESEND_FROM_EMAIL` auf z.B. `ChainIt <noreply@eure-domain.de>` ändern.
+## Technology Stack
 
-### Redeploys
+- **Framework**: Next.js 15.5.24
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **State Management**: React Context API
+- **UI Components**: Custom React components with Tailwind CSS
 
-Jeder `git push` auf den verbundenen Branch löst automatisch ein neues
-Deployment aus.
+## Key Components
+
+### Dashboard Component
+Main container managing tab navigation and component rendering.
+
+### TaskContext
+Global state management for tasks and buckets, providing:
+- Task CRUD operations
+- Bucket management
+- Task status toggling
+- State persistence across components
+
+### Views
+Three main view components:
+1. **DashboardView** - Statistics, team workload, and alerts
+2. **TasksView** - Task management with filtering
+3. **BrainstormingView** - Idea tracking and voting
+
+## Workflow
+
+### Creating a Task
+1. Click "New Task" in the Tasks view
+2. Fill in title, description, assignee, priority, due date, bucket, and notes
+3. Click "Create Task"
+
+### Managing Tasks
+- **Check off**: Click checkbox to advance task status (Open → In Progress → Completed)
+- **View details**: Click "Details" to see full notes
+- **Edit**: Click "Edit" to modify task information
+- **Delete**: Click "Delete" to remove a task
+
+### Filtering Tasks
+Use the filter controls to view:
+- Tasks assigned to specific team members
+- Tasks by status (Open, In Progress, Completed)
+- Tasks by bucket/category
+
+### Brainstorming
+1. Click "New Idea" to add a strategy or feature concept
+2. Fill in title, description, category, and author
+3. Click "Add Idea"
+4. Vote on ideas to prioritize discussions
+5. Ideas are automatically sorted by popularity
+
+## Color Scheme
+
+Professional slate-based design with blue accents:
+- Background: Slate-50
+- Primary: Blue-600
+- Status indicators: Green (completed), Blue (in-progress), Slate (open)
+- Alerts: Red for high priority and overdue
+- Priority: Low (Blue), Medium (Amber), High (Red)
+
+## Browser Compatibility
+
+Works on all modern browsers supporting ES2020 and CSS Grid/Flexbox.
+
+## Future Enhancements
+
+- Database persistence with Prisma/PostgreSQL
+- Real-time collaboration features
+- Custom status workflows
+- Advanced reporting and analytics
+- Export functionality (CSV, PDF)
+- Calendar view for deadline management
+- Team activity timeline
+- Task comments and mentions
+
+---
+
+Built with care for the ChainIt Technologies team.
