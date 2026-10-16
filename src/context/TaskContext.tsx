@@ -1,13 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from './AuthContext';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 export interface Task {
   id: string;
@@ -50,10 +45,18 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   const [buckets, setBuckets] = useState<Bucket[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Reload when the logged-in user changes, so data is fetched with the user's session.
   useEffect(() => {
+    if (!user) {
+      setTasks([]);
+      setBuckets([]);
+      setLoading(false);
+      return;
+    }
     loadData();
-    subscribeToChanges();
-  }, []);
+    return subscribeToChanges();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const loadData = async () => {
     try {
@@ -130,7 +133,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         assigned_to: task.assignedTo,
         status: task.status,
         priority: task.priority,
-        due_date: task.dueDate,
+        due_date: task.dueDate || null,
         bucket: task.bucket,
         notes: task.notes,
         created_by: user.id,
@@ -147,7 +150,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     if (updates.assignedTo !== undefined) dbUpdates.assigned_to = updates.assignedTo;
     if (updates.status !== undefined) dbUpdates.status = updates.status;
     if (updates.priority !== undefined) dbUpdates.priority = updates.priority;
-    if (updates.dueDate !== undefined) dbUpdates.due_date = updates.dueDate;
+    if (updates.dueDate !== undefined) dbUpdates.due_date = updates.dueDate || null;
     if (updates.bucket !== undefined) dbUpdates.bucket = updates.bucket;
     if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
 

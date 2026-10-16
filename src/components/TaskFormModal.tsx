@@ -49,7 +49,8 @@ export default function TaskFormModal({ task, defaultBucket, onClose }: TaskForm
       onClose();
     } catch (err) {
       console.error('Error saving task:', err);
-      setError('Error saving task. Please try again.');
+      const message = (err as { message?: string })?.message;
+      setError(message ? `Error saving task: ${message}` : 'Error saving task. Please try again.');
     } finally {
       setSaving(false);
     }
